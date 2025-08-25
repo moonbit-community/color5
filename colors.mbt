@@ -17,10 +17,11 @@
 /// # Example
 /// ```moonbit
 /// // Use constructor methods to create colors
-/// let red_rgb : Color = @colors.Color::rgb(255, 0, 0)
-/// let red_linear : Color = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
-/// let white_xyz : Color = @colors.Color::xyz(95.047, 100.0, 108.883)  // D65 white point
-/// let white_luv : Color = @colors.Color::luv(100.0, 0.0, 0.0)
+/// let red_rgb = @colors.Color::rgb(255, 0, 0)
+/// let red_linear = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
+/// 
+/// inspect(red_rgb, content="RGB(255, 0, 0)")
+/// inspect(red_linear, content="LinearRGB(1, 0, 0)")
 /// ```
 pub enum Color {
   RGB(Int, Int, Int) // Standard RGB (0-255)
@@ -113,10 +114,11 @@ fn matrix_multiply(
 ///
 /// # Example
 /// ```moonbit
-/// let red : Color = @colors.Color::rgb(255, 0, 0)
-/// let green : Color = @colors.Color::rgb(0, 255, 0)
-/// let blue : Color = @colors.Color::rgb(0, 0, 255)
-/// let clamped : Color = @colors.Color::rgb(300, -50, 128)  // becomes RGB(255, 0, 128)
+/// let red = @colors.Color::rgb(255, 0, 0)
+/// let clamped = @colors.Color::rgb(300, -50, 128)  // becomes RGB(255, 0, 128)
+/// 
+/// inspect(red, content="RGB(255, 0, 0)")
+/// inspect(clamped, content="RGB(255, 0, 128)")
 /// ```
 pub fn Color::rgb(r : Int, g : Int, b : Int) -> Color {
   let r_clamped = if r < 0 { 0 } else if r > 255 { 255 } else { r }
@@ -143,10 +145,19 @@ pub fn Color::rgb(r : Int, g : Int, b : Int) -> Color {
 ///
 /// # Example
 /// ```moonbit
-/// let rgb_gray : Color = @colors.Color::rgb(128, 128, 128)
-/// let linear_gray : Color = rgb_gray.to_linear()
+/// let rgb_gray = @colors.Color::rgb(128, 128, 128)
+/// let linear_gray = rgb_gray.to_linear()
 /// // RGB(128, 128, 128) becomes approximately LinearRGB(0.22, 0.22, 0.22)
 /// // Note: Not 0.5 due to gamma correction!
+/// 
+/// inspect(rgb_gray, content="RGB(128, 128, 128)")
+/// match linear_gray {
+///   LinearRGB(r, _, _) => {
+///     let is_gamma_corrected = r < 0.3 && r > 0.1
+///     inspect(is_gamma_corrected, content="true")
+///   }
+///   _ => ()
+/// }
 /// ```
 pub fn Color::to_linear(self : Color) -> Color {
   match self {
@@ -200,9 +211,11 @@ pub fn Color::from_linear(self : Color) -> Color {
 ///
 /// # Example
 /// ```moonbit
-/// let linear_red : Color = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
-/// let linear_gray : Color = @colors.Color::linear_rgb(0.5, 0.5, 0.5)
-/// let clamped : Color = @colors.Color::linear_rgb(2.0, -0.5, 0.8)  // becomes LinearRGB(1.0, 0.0, 0.8)
+/// let linear_red = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
+/// let clamped = @colors.Color::linear_rgb(2.0, -0.5, 0.8)  // becomes LinearRGB(1.0, 0.0, 0.8)
+/// 
+/// inspect(linear_red, content="LinearRGB(1, 0, 0)")
+/// inspect(clamped, content="LinearRGB(1, 0, 0.8)")
 /// ```
 pub fn Color::linear_rgb(r : Double, g : Double, b : Double) -> Color {
   LinearRGB(clamp(r, 0.0, 1.0), clamp(g, 0.0, 1.0), clamp(b, 0.0, 1.0))
@@ -353,26 +366,26 @@ pub fn Color::luv(l : Double, u : Double, v : Double) -> Color {
 ///
 /// # Example
 /// ```moonbit
-/// let red : Color = @colors.Color::rgb(255, 0, 0)
-/// let blue : Color = @colors.Color::rgb(0, 0, 255)
+/// let red = @colors.Color::rgb(255, 0, 0)
+/// let blue = @colors.Color::rgb(0, 0, 255)
 /// 
-/// let purple : Color = @colors.Color::blend_rgb(red, blue, 0.5)  // RGB(128, 0, 128)
-/// let mostly_red : Color = @colors.Color::blend_rgb(red, blue, 0.25)  // RGB(192, 0, 64)
-/// let mostly_blue : Color = @colors.Color::blend_rgb(red, blue, 0.75)  // RGB(64, 0, 192)
+/// let purple = @colors.Color::blend_rgb(red, blue, 0.5)  // RGB(128, 0, 128)
+/// 
+/// inspect(purple, content="RGB(128, 0, 128)")
 /// ```
 pub fn Color::blend_rgb(color1 : Color, color2 : Color, mix : Double) -> Color {
   match (color1, color2) {
     (RGB(r1, g1, b1), RGB(r2, g2, b2)) => {
       let mix_clamped = clamp(mix, 0.0, 1.0)
       let r = (r1.to_double() * (1.0 - mix_clamped) +
-      r2.to_double() * mix_clamped +
-      0.5).to_int()
+               r2.to_double() * mix_clamped +
+               0.5).to_int()
       let g = (g1.to_double() * (1.0 - mix_clamped) +
-      g2.to_double() * mix_clamped +
-      0.5).to_int()
+               g2.to_double() * mix_clamped +
+               0.5).to_int()
       let b = (b1.to_double() * (1.0 - mix_clamped) +
-      b2.to_double() * mix_clamped +
-      0.5).to_int()
+               b2.to_double() * mix_clamped +
+               0.5).to_int()
       RGB(r, g, b)
     }
     _ => abort("Both colors must be RGB for RGB blending")
@@ -416,11 +429,10 @@ pub fn Color::blend_linear(color1 : Color, color2 : Color, mix : Double) -> Colo
 ///
 /// # Example
 /// ```moonbit
-/// let xyz_color : Color = @colors.Color::xyz(41.24, 21.26, 1.93)
-/// let rgb_color : Color = xyz_color.as_rgb()  // Converts XYZ → LinearRGB → RGB
-///
-/// let luv_color : Color = @colors.Color::luv(53.24, 175.05, 37.75)
-/// let rgb_from_luv : Color = luv_color.as_rgb()  // Converts LUV → XYZ → LinearRGB → RGB
+/// let xyz_color = @colors.Color::xyz(41.24, 21.26, 1.93)
+/// let rgb_color = xyz_color.as_rgb()  // Converts XYZ → LinearRGB → RGB
+/// 
+/// inspect(rgb_color, content="RGB(255, 0, 0)")
 /// ```
 pub fn Color::as_rgb(self : Color) -> Color {
   match self {

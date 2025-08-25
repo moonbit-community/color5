@@ -16,22 +16,26 @@ This library is a port of the [OCaml colors library](https://github.com/ocaml-tu
 
 ## Quick Start
 
-```moonbit
-// Create colors using constructor methods
-let red : Color = @colors.Color::rgb(255, 0, 0)
-let linear_red : Color = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
+test "quick start example" {
+  // Create colors using constructor methods
+  let red = @colors.Color::rgb(255, 0, 0)
+  let linear_red = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
 
-// Convert between color spaces
-let xyz_red : Color = red.as_xyz()
-let luv_red : Color = red.as_luv()
+  // Convert between color spaces
+  let xyz_red = red.as_xyz()
+  let luv_red = red.as_luv()
 
-// Chain conversions
-let final_color : Color = red.to_linear().to_xyz().to_luv().as_rgb()
+  // Chain conversions
+  let final_color = red.to_linear().to_xyz().to_luv().as_rgb()
 
-// Blend colors
-let blue : Color = @colors.Color::rgb(0, 0, 255)
-let purple : Color = @colors.Color::blend_rgb(red, blue, 0.5)
-```
+  // Blend colors
+  let blue = @colors.Color::rgb(0, 0, 255)
+  let purple = @colors.Color::blend_rgb(red, blue, 0.5)
+  
+  // Verify the results
+  inspect(red, content="RGB(255, 0, 0)")
+  inspect(purple, content="RGB(128, 0, 128)")
+}
 
 ## Documentation
 
@@ -181,36 +185,60 @@ test "standard color operations" {
 This library uses MoonBit's object-oriented features to provide a clean, discoverable API:
 
 ### Constructor Methods (Static)
-```moonbit
-let red : Color = @colors.Color::rgb(255, 0, 0)        // Create RGB color
-let linear : Color = @colors.Color::linear_rgb(1.0, 0.0, 0.0)  // Create LinearRGB color
-let xyz : Color = @colors.Color::xyz(41.24, 21.26, 1.93)    // Create XYZ color
-let luv : Color = @colors.Color::luv(53.24, 175.05, 37.75)  // Create LUV color
-```
+test "constructor methods" {
+  let red = @colors.Color::rgb(255, 0, 0)        // Create RGB color
+  let linear = @colors.Color::linear_rgb(1.0, 0.0, 0.0)  // Create LinearRGB color
+  let xyz = @colors.Color::xyz(41.24, 21.26, 1.93)    // Create XYZ color
+  let luv = @colors.Color::luv(53.24, 175.05, 37.75)  // Create LUV color
+  
+  inspect(red, content="RGB(255, 0, 0)")
+  inspect(linear, content="LinearRGB(1, 0, 0)")
+}
 
 ### Instance Methods (Conversions)
-```moonbit
-let linear_color : Color = color.to_linear()      // RGB → LinearRGB
-let rgb_color : Color = color.from_linear()    // LinearRGB → RGB
-let xyz_color : Color = color.to_xyz()         // LinearRGB → XYZ
-let linear_from_xyz : Color = color.from_xyz()       // XYZ → LinearRGB
-let luv_color : Color = color.to_luv()         // XYZ → LUV
-let xyz_from_luv : Color = color.from_luv()       // LUV → XYZ
-```
+test "instance conversion methods" {
+  let rgb_color = @colors.Color::rgb(255, 128, 64)
+  let linear_color = rgb_color.to_linear()      // RGB → LinearRGB
+  let back_to_rgb = linear_color.from_linear()    // LinearRGB → RGB
+  
+  let linear_for_xyz = @colors.Color::linear_rgb(0.8, 0.6, 0.4)
+  let xyz_color = linear_for_xyz.to_xyz()         // LinearRGB → XYZ
+  let linear_from_xyz = xyz_color.from_xyz()       // XYZ → LinearRGB
+  
+  let xyz_for_luv = @colors.Color::xyz(50.0, 60.0, 70.0)
+  let luv_color = xyz_for_luv.to_luv()         // XYZ → LUV
+  let xyz_from_luv = luv_color.from_luv()       // LUV → XYZ
+  
+  inspect(rgb_color, content="RGB(255, 128, 64)")
+  inspect(back_to_rgb, content="RGB(255, 128, 64)")
+}
 
 ### Universal Conversions (Instance)
-```moonbit
-let rgb : Color = color.as_rgb()         // Any color space → RGB
-let linear : Color = color.as_linear_rgb()  // Any color space → LinearRGB
-let xyz : Color = color.as_xyz()         // Any color space → XYZ
-let luv : Color = color.as_luv()         // Any color space → LUV
-```
+test "universal conversion methods" {
+  let original_color = @colors.Color::xyz(41.24, 21.26, 1.93)
+  
+  let rgb = original_color.as_rgb()         // Any color space → RGB
+  let linear = original_color.as_linear_rgb()  // Any color space → LinearRGB
+  let xyz = original_color.as_xyz()         // Any color space → XYZ
+  let luv = original_color.as_luv()         // Any color space → LUV
+  
+  inspect(rgb, content="RGB(255, 0, 0)")
+  inspect(xyz, content="XYZ(41.24, 21.26, 1.93)")
+}
 
 ### Blending Methods (Static)
-```moonbit
-let blended_rgb : Color = @colors.Color::blend_rgb(color1, color2, 0.5)     // Blend RGB colors
-let blended_linear : Color = @colors.Color::blend_linear(color1, color2, 0.5)  // Blend LinearRGB colors
-```
+test "blending methods" {
+  let red = @colors.Color::rgb(255, 0, 0)
+  let blue = @colors.Color::rgb(0, 0, 255)
+  let blended_rgb = @colors.Color::blend_rgb(red, blue, 0.5)     // Blend RGB colors
+  
+  let linear_red = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
+  let linear_blue = @colors.Color::linear_rgb(0.0, 0.0, 1.0)
+  let blended_linear = @colors.Color::blend_linear(linear_red, linear_blue, 0.5)  // Blend LinearRGB colors
+  
+  inspect(blended_rgb, content="RGB(128, 0, 128)")
+  inspect(blended_linear, content="LinearRGB(0.5, 0, 0.5)")
+}
 
 ## Installation
 
