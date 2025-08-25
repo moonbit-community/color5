@@ -5,5 +5,6 @@
   "repository": "https://github.com/dii/color5",
   "license": "MIT",
   "keywords": ["colors", "color-spaces", "rgb", "xyz", "luv", "graphics"],
-  "description": "A pure MoonBit library for manipulating colors in different color spaces (RGB, LinearRGB, XYZ, LUV)"
+  "description": "A pure MoonBit library for manipulating colors in different color spaces (RGB, LinearRGB, XYZ, LUV)",
+  "alert-list": "+test_import_all"
 }
