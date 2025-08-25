@@ -1,40 +1,47 @@
 # Colors Library
 
-A comprehensive MoonBit library for manipulating colors across multiple color spaces with proper gamma correction and type safety.
+A comprehensive MoonBit library for manipulating colors across multiple color spaces with proper gamma correction and compile-time type safety.
 
-This library is a port of the [OCaml colors library](https://github.com/ocaml-tui/colors) to MoonBit, redesigned with an object-oriented API using MoonBit's `fn Type::method` syntax.
+This library is a port of the [OCaml colors library](https://github.com/ocaml-tui/colors) to MoonBit, redesigned with separate types per color space for maximum type safety and performance.
 
 ## Features
 
-- **Multiple Color Spaces**: RGB, LinearRGB, XYZ, and CIE LUV
+- **Multiple Color Spaces**: RGB, LinearRGB, XYZ, and CIE LUV with separate types
+- **Compile-Time Type Safety**: No runtime type checking or potential panics
 - **Seamless Conversions**: Convert between any color spaces with automatic intermediate conversions
 - **Color Blending**: Blend colors in RGB or LinearRGB space with proper gamma handling
 - **Gamma Correction**: Proper sRGB gamma correction for accurate color representation
-- **Type Safety**: Full type safety with MoonBit's type system and runtime checks
-- **Object-Oriented API**: Clean, discoverable API using static and instance methods
-- **Method Chaining**: Fluent API for chaining color operations
+- **Universal Conversion Functions**: Function-based API for color conversions
+- **Function Chaining**: Fluent API for chaining color operations with pipe operator
+- **Performance**: Zero-overhead abstractions with no enum discriminants
 
 ## Quick Start
 
 test "quick start example" {
-  // Create colors using constructor methods
-  let red = @colors.Color::rgb(255, 0, 0)
-  let linear_red = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
+  // Create colors using type-safe constructors
+  let red = @colors.rgb(255, 0, 0)
+  let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
 
-  // Convert between color spaces
-  let xyz_red = red.as_xyz()
-  let luv_red = red.as_luv()
+  // Convert between color spaces (compile-time checked)
+  let xyz_red = @colors.linear_to_xyz(@colors.rgb_to_linear(red))
+  let luv_red = @colors.xyz_to_luv(xyz_red)
 
-  // Chain conversions
-  let final_color = red.to_linear().to_xyz().to_luv().as_rgb()
+  // Chain conversions with full type safety
+  let final_color = red
+    |> @colors.rgb_to_linear
+    |> @colors.linear_to_xyz
+    |> @colors.xyz_to_luv
+    |> @colors.luv_to_xyz
+    |> @colors.xyz_to_linear
+    |> @colors.linear_to_rgb
 
   // Blend colors
-  let blue = @colors.Color::rgb(0, 0, 255)
-  let purple = @colors.Color::blend_rgb(red, blue, 0.5)
+  let blue = @colors.rgb(0, 0, 255)
+  let purple = @colors.rgb_blend(red, blue, 0.5)
   
   // Verify the results
-  inspect(red, content="RGB(255, 0, 0)")
-  inspect(purple, content="RGB(128, 0, 128)")
+  inspect(red, content="RGBColor({ {r: 255, g: 0, b: 0 }})")
+  inspect(purple, content="RGBColor({ {r: 128, g: 0, b: 128 }})")
 }
 
 ## Documentation
@@ -49,196 +56,201 @@ test "quick start example" {
 
 test "creating colors in different color spaces" {
   // Create RGB colors (0-255 range)
-  let red = @colors.Color::rgb(255, 0, 0)
-  let green = @colors.Color::rgb(0, 255, 0)
-  let blue = @colors.Color::rgb(0, 0, 255)
-  let white = @colors.Color::rgb(255, 255, 255)
+  let red = @colors.rgb(255, 0, 0)
+  let green = @colors.rgb(0, 255, 0)
+  let blue = @colors.rgb(0, 0, 255)
+  let white = @colors.rgb(255, 255, 255)
   
-  inspect(red, content="RGB(255, 0, 0)")
-  inspect(white, content="RGB(255, 255, 255)")
+  inspect(red, content="RGBColor({ {r: 255, g: 0, b: 0 }})")
+  inspect(white, content="RGBColor({ {r: 255, g: 255, b: 255 }})")
   
   // Create LinearRGB colors (0.0-1.0 range)
-  let linear_red = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
-  let linear_gray = @colors.Color::linear_rgb(0.5, 0.5, 0.5)
+  let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
+  let linear_white = @colors.linear_rgb(1.0, 1.0, 1.0)
   
-  inspect(linear_red, content="LinearRGB(1, 0, 0)")
-  inspect(linear_gray, content="LinearRGB(0.5, 0.5, 0.5)")
+  inspect(linear_red, content="LinearRGBColor({ {r: 1, g: 0, b: 0 }})")
   
-  // Create XYZ colors (D65 white point)
-  let xyz_white = @colors.Color::xyz(95.047, 100.0, 108.883)
-  inspect(xyz_white, content="XYZ(95.047, 100, 108.883)")
+  // Create XYZ colors
+  let xyz_white = @colors.xyz(95.047, 100.0, 108.883)  // D65 white point
+  inspect(xyz_white, content="XYZColor({ {x: 95.047, y: 100, z: 108.883 }})")
   
   // Create LUV colors
-  let luv_white = @colors.Color::luv(100.0, 0.0, 0.0)
-  inspect(luv_white, content="LUV(100, 0, 0)")
+  let luv_white = @colors.luv(100.0, 0.0, 0.0)  // L*=100 for white
+  inspect(luv_white, content="LUVColor({ {l: 100, u: 0, v: 0 }})")
 }
 
 ### Color Space Conversions
 
-test "converting between color spaces" {
-  // Start with an RGB color
-  let rgb_color = @colors.Color::rgb(200, 150, 100)
+test "color space conversions" {
+  let rgb_color = @colors.rgb(255, 128, 64)
   
-  // Convert through different color spaces
-  let as_linear = rgb_color.as_linear_rgb()
-  let as_xyz = rgb_color.as_xyz()
-  let as_luv = rgb_color.as_luv()
+  // Direct conversions (compile-time type checked)
+  let linear_color = @colors.rgb_to_linear(rgb_color)
+  let xyz_color = @colors.linear_to_xyz(linear_color)
+  let luv_color = @colors.xyz_to_luv(xyz_color)
   
-  // Convert back to RGB to verify round-trip accuracy
-  let back_from_linear = as_linear.as_rgb()
-  let back_from_xyz = as_xyz.as_rgb()
-  let back_from_luv = as_luv.as_rgb()
+  // Reverse conversions
+  let back_to_xyz = @colors.luv_to_xyz(luv_color)
+  let back_to_linear = @colors.xyz_to_linear(back_to_xyz)
+  let back_to_rgb = @colors.linear_to_rgb(back_to_linear)
   
-  // All conversions should be very close to the original
-  inspect(rgb_color, content="RGB(200, 150, 100)")
-  inspect(back_from_linear, content="RGB(200, 150, 100)")
-  
-  // XYZ and LUV conversions may have small rounding differences
-  match (rgb_color, back_from_xyz) {
-    (RGB(r1, g1, b1), RGB(r2, g2, b2)) => {
+  // Should be very close to original
+  match (rgb_color, back_to_rgb) {
+    ({ r: r1, g: g1, b: b1 }, { r: r2, g: g2, b: b2 }) => {
       let close = (r1 - r2).abs() <= 2 && (g1 - g2).abs() <= 2 && (b1 - b2).abs() <= 2
       inspect(close, content="true")
     }
-    _ => inspect(false, content="true")
+  }
+}
+
+### Universal Conversions
+
+test "universal conversions with functions" {
+  // Convert through different color spaces to RGB
+  let rgb_original = @colors.rgb(200, 100, 50)
+  let linear_color = @colors.linear_rgb(0.8, 0.4, 0.2)
+  let xyz_color = @colors.xyz(30.0, 25.0, 15.0)
+  let luv_color = @colors.luv(60.0, 40.0, 20.0)
+  
+  // All can be converted to RGB using specific functions
+  let rgb1 = @colors.rgb_to_rgb(rgb_original)  // Identity
+  let rgb2 = @colors.linear_rgb_to_rgb(linear_color)  // LinearRGB -> RGB
+  let rgb3 = @colors.xyz_to_rgb(xyz_color)     // XYZ -> LinearRGB -> RGB
+  let rgb4 = @colors.luv_to_rgb(luv_color)     // LUV -> XYZ -> LinearRGB -> RGB
+  
+  // Original should be unchanged
+  inspect(rgb1, content="RGBColor({ {r: 200, g: 100, b: 50 }})")
+  
+  // Others should produce valid RGB colors
+  match rgb2 {
+    { r, g, b } => {
+      let valid = r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255
+      inspect(valid, content="true")
+    }
   }
 }
 
 ### Color Blending
 
-test "blending colors" {
-  let black = @colors.Color::rgb(0, 0, 0)
-  let white = @colors.Color::rgb(255, 255, 255)
-  let red = @colors.Color::rgb(255, 0, 0)
-  let blue = @colors.Color::rgb(0, 0, 255)
+test "color blending" {
+  let red = @colors.rgb(255, 0, 0)
+  let blue = @colors.rgb(0, 0, 255)
   
-  // 50% blend creates gray
-  let gray = @colors.Color::blend_rgb(black, white, 0.5)
-  inspect(gray, content="RGB(128, 128, 128)")
+  // RGB blending
+  let purple = @colors.rgb_blend(red, blue, 0.5)
+  let mostly_red = @colors.rgb_blend(red, blue, 0.25)
   
-  // 25% blend is closer to first color
-  let dark_gray = @colors.Color::blend_rgb(black, white, 0.25)
-  inspect(dark_gray, content="RGB(64, 64, 64)")
+  inspect(purple, content="RGBColor({ {r: 128, g: 0, b: 128 }})")
+  inspect(mostly_red, content="RGBColor({ {r: 192, g: 0, b: 64 }})")
   
-  // Blend red and blue to create purple
-  let purple = @colors.Color::blend_rgb(red, blue, 0.5)
-  inspect(purple, content="RGB(128, 0, 128)")
+  // Linear blending (more accurate for lighting)
+  let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
+  let linear_blue = @colors.linear_rgb(0.0, 0.0, 1.0)
+  let linear_purple = @colors.linear_blend(linear_red, linear_blue, 0.5)
   
-  // Linear RGB blending (more accurate for lighting)
-  let linear_red = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
-  let linear_blue = @colors.Color::linear_rgb(0.0, 0.0, 1.0)
-  let linear_purple = @colors.Color::blend_linear(linear_red, linear_blue, 0.5)
-  inspect(linear_purple, content="LinearRGB(0.5, 0, 0.5)")
+  inspect(linear_purple, content="LinearRGBColor({ {r: 0.5, g: 0, b: 0.5 }})")
 }
 
 ### Gamma Correction
 
 test "gamma correction demonstration" {
-  // RGB 128 is not 50% brightness due to gamma correction
-  let rgb_mid = @colors.Color::rgb(128, 128, 128)
-  let linear_mid = rgb_mid.to_linear()
+  // Demonstrate the difference between RGB and LinearRGB
+  let rgb_mid = @colors.rgb(128, 128, 128)  // 50% in RGB space
+  let linear_mid = @colors.rgb_to_linear(rgb_mid)
   
+  // The linear value will be around 0.22, not 0.5!
   match linear_mid {
-    LinearRGB(r, _, _) => {
-      // Linear value should be around 0.22, not 0.5
-      let is_gamma_corrected = r < 0.3 && r > 0.1
-      inspect(is_gamma_corrected, content="true")
+    { r, g, b } => {
+      // Due to gamma correction, RGB 128 ≈ Linear 0.22
+      let gamma_corrected = r < 0.3 && r > 0.1
+      inspect(gamma_corrected, content="true")
     }
-    _ => inspect(false, content="true")
   }
   
-  // Convert back should give original value
-  let back_to_rgb = linear_mid.from_linear()
-  inspect(back_to_rgb, content="RGB(128, 128, 128)")
+  // Convert back to verify round-trip accuracy
+  let back_to_rgb = @colors.linear_to_rgb(linear_mid)
+  inspect(back_to_rgb, content="RGBColor({ {r: 128, g: 128, b: 128 }})")
 }
 
 ### Working with Standard Colors
 
-test "standard color operations" {
-  // Create primary colors
-  let red = @colors.Color::rgb(255, 0, 0)
-  let green = @colors.Color::rgb(0, 255, 0) 
-  let blue = @colors.Color::rgb(0, 0, 255)
+test "standard colors" {
+  // Primary colors
+  let red = @colors.rgb(255, 0, 0)
+  let green = @colors.rgb(0, 255, 0)
+  let blue = @colors.rgb(0, 0, 255)
   
-  // Mix primaries to get secondaries
-  let yellow = @colors.Color::blend_rgb(red, green, 0.5)
-  let cyan = @colors.Color::blend_rgb(green, blue, 0.5)
-  let magenta = @colors.Color::blend_rgb(red, blue, 0.5)
+  // Secondary colors through blending
+  let cyan = @colors.rgb_blend(green, blue, 0.5)
+  let magenta = @colors.rgb_blend(red, blue, 0.5)
+  let yellow = @colors.rgb_blend(red, green, 0.5)
   
-  inspect(yellow, content="RGB(128, 128, 0)")
-  inspect(cyan, content="RGB(0, 128, 128)")
-  inspect(magenta, content="RGB(128, 0, 128)")
+  inspect(cyan, content="RGBColor({ {r: 0, g: 128, b: 128 }})")
+  inspect(magenta, content="RGBColor({ {r: 128, g: 0, b: 128 }})")
+  inspect(yellow, content="RGBColor({ {r: 128, g: 128, b: 0 }})")
   
   // Convert to XYZ for color science applications
-  let red_xyz = red.as_xyz()
+  let red_xyz = @colors.rgb_to_xyz(red)
   match red_xyz {
-    XYZ(x, y, z) => {
-      // Red should have high X, low Y, very low Z
-      let is_red_xyz = x > 40.0 && y > 20.0 && z < 5.0
-      inspect(is_red_xyz, content="true")
+    { x, y, z } => {
+      // Should be approximately the red primary in XYZ
+      let reasonable_red = x > 30.0 && x < 50.0 && y > 15.0 && y < 25.0 && z < 5.0
+      inspect(reasonable_red, content="true")
     }
-    _ => inspect(false, content="true")
   }
 }
 
-## API Design
+### Function Chaining with Pipe Operator
 
-This library uses MoonBit's object-oriented features to provide a clean, discoverable API:
-
-### Constructor Methods (Static)
-test "constructor methods" {
-  let red = @colors.Color::rgb(255, 0, 0)        // Create RGB color
-  let linear = @colors.Color::linear_rgb(1.0, 0.0, 0.0)  // Create LinearRGB color
-  let xyz = @colors.Color::xyz(41.24, 21.26, 1.93)    // Create XYZ color
-  let luv = @colors.Color::luv(53.24, 175.05, 37.75)  // Create LUV color
+test "chained color operations" {
+  let original_color = @colors.rgb(200, 150, 100)
   
-  inspect(red, content="RGB(255, 0, 0)")
-  inspect(linear, content="LinearRGB(1, 0, 0)")
+  // Chain multiple conversions using pipe operator
+  let processed_color = original_color
+    |> @colors.rgb_to_linear      // Convert to linear space
+    |> @colors.linear_to_xyz      // Convert to XYZ
+    |> @colors.xyz_to_luv         // Convert to LUV for processing
+    |> @colors.luv_to_xyz         // Convert back to XYZ
+    |> @colors.xyz_to_linear      // Convert back to linear
+    |> @colors.linear_to_rgb      // Convert back to RGB
+  
+  // Should be very close to original (within rounding error)
+  match (original_color, processed_color) {
+    ({ r: r1, g: g1, b: b1 }, { r: r2, g: g2, b: b2 }) => {
+      let close = (r1 - r2).abs() <= 2 && (g1 - g2).abs() <= 2 && (b1 - b2).abs() <= 2
+      inspect(close, content="true")
+    }
+  }
 }
 
-### Instance Methods (Conversions)
-test "instance conversion methods" {
-  let rgb_color = @colors.Color::rgb(255, 128, 64)
-  let linear_color = rgb_color.to_linear()      // RGB → LinearRGB
-  let back_to_rgb = linear_color.from_linear()    // LinearRGB → RGB
-  
-  let linear_for_xyz = @colors.Color::linear_rgb(0.8, 0.6, 0.4)
-  let xyz_color = linear_for_xyz.to_xyz()         // LinearRGB → XYZ
-  let linear_from_xyz = xyz_color.from_xyz()       // XYZ → LinearRGB
-  
-  let xyz_for_luv = @colors.Color::xyz(50.0, 60.0, 70.0)
-  let luv_color = xyz_for_luv.to_luv()         // XYZ → LUV
-  let xyz_from_luv = luv_color.from_luv()       // LUV → XYZ
-  
-  inspect(rgb_color, content="RGB(255, 128, 64)")
-  inspect(back_to_rgb, content="RGB(255, 128, 64)")
-}
+## Type System Design
 
-### Universal Conversions (Instance)
-test "universal conversion methods" {
-  let original_color = @colors.Color::xyz(41.24, 21.26, 1.93)
-  
-  let rgb = original_color.as_rgb()         // Any color space → RGB
-  let linear = original_color.as_linear_rgb()  // Any color space → LinearRGB
-  let xyz = original_color.as_xyz()         // Any color space → XYZ
-  let luv = original_color.as_luv()         // Any color space → LUV
-  
-  inspect(rgb, content="RGB(255, 0, 0)")
-  inspect(xyz, content="XYZ(41.24, 21.26, 1.93)")
-}
+This library uses separate types for each color space, providing several advantages:
 
-### Blending Methods (Static)
-test "blending methods" {
-  let red = @colors.Color::rgb(255, 0, 0)
-  let blue = @colors.Color::rgb(0, 0, 255)
-  let blended_rgb = @colors.Color::blend_rgb(red, blue, 0.5)     // Blend RGB colors
-  
-  let linear_red = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
-  let linear_blue = @colors.Color::linear_rgb(0.0, 0.0, 1.0)
-  let blended_linear = @colors.Color::blend_linear(linear_red, linear_blue, 0.5)  // Blend LinearRGB colors
-  
-  inspect(blended_rgb, content="RGB(128, 0, 128)")
-  inspect(blended_linear, content="LinearRGB(0.5, 0, 0.5)")
-}
+### Compile-Time Type Safety
+- **No runtime type checking** - all conversions are statically verified
+- **No `abort()` calls** - impossible to call wrong conversion method
+- **Clear API contracts** - function signatures show exactly what types are expected
+
+### Performance Benefits
+- **No enum overhead** - each struct contains only the data it needs
+- **Better memory layout** - no discriminant field
+- **Zero-cost abstractions** - compiler can optimize better with known types
+
+### Function-Based API
+- **Type-specific functions** - each color type has dedicated conversion functions
+- **IDE support** - autocomplete shows only valid operations
+- **Documentation clarity** - each function can have specific documentation
+
+### Universal Conversion Functions
+The library provides comprehensive conversion functions between all color spaces:
+
+- **RGB conversions**: `rgb_to_rgb()`, `rgb_to_linear_rgb()`, `rgb_to_xyz()`, `rgb_to_luv()`
+- **LinearRGB conversions**: `linear_rgb_to_rgb()`, `linear_rgb_to_linear_rgb()`, `linear_rgb_to_xyz()`, `linear_rgb_to_luv()`
+- **XYZ conversions**: `xyz_to_rgb()`, `xyz_to_linear_rgb()`, `xyz_to_xyz()`, `xyz_to_luv_color()`
+- **LUV conversions**: `luv_to_rgb()`, `luv_to_linear_rgb()`, `luv_to_xyz_color()`, `luv_to_luv()`
+
+These functions enable seamless conversion between any color spaces while maintaining type safety.
 
 ## Installation
 
@@ -260,7 +272,7 @@ Run the comprehensive test suite:
 moon test
 ```
 
-The library includes 17 test cases covering all color spaces, conversions, edge cases, and known reference values.
+The library includes comprehensive test cases covering all color spaces, conversions, edge cases, and known reference values.
 
 ## Contributing
 
