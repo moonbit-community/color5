@@ -1,0 +1,51 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dii/colors"
+
+// Values
+fn blend_linear(Color, Color, Double) -> Color
+
+fn blend_rgb(Color, Color, Double) -> Color
+
+fn linear_rgb(Double, Double, Double) -> Color
+
+fn linear_to_rgb(Color) -> Color
+
+fn linear_to_xyz(Color) -> Color
+
+fn luv(Double, Double, Double) -> Color
+
+fn luv_to_xyz(Color) -> Color
+
+fn rgb(Int, Int, Int) -> Color
+
+fn rgb_to_linear(Color) -> Color
+
+fn to_linear_rgb(Color) -> Color
+
+fn to_luv(Color) -> Color
+
+fn to_rgb(Color) -> Color
+
+fn to_xyz(Color) -> Color
+
+fn xyz(Double, Double, Double) -> Color
+
+fn xyz_to_linear(Color) -> Color
+
+fn xyz_to_luv(Color) -> Color
+
+// Errors
+
+// Types and methods
+pub enum Color {
+  RGB(Int, Int, Int)
+  LinearRGB(Double, Double, Double)
+  XYZ(Double, Double, Double)
+  LUV(Double, Double, Double)
+}
+impl Show for Color
+
+// Type aliases
+
+// Traits
+
