@@ -2,37 +2,6 @@
 package "bobzhang/colors"
 
 // Values
-fn blend_linear(Color, Color, Double) -> Color
-
-fn blend_rgb(Color, Color, Double) -> Color
-
-fn linear_rgb(Double, Double, Double) -> Color
-
-fn linear_to_rgb(Color) -> Color
-
-fn linear_to_xyz(Color) -> Color
-
-fn luv(Double, Double, Double) -> Color
-
-fn luv_to_xyz(Color) -> Color
-
-fn rgb(Int, Int, Int) -> Color
-
-fn rgb_to_linear(Color) -> Color
-
-fn to_linear_rgb(Color) -> Color
-
-fn to_luv(Color) -> Color
-
-fn to_rgb(Color) -> Color
-
-fn to_xyz(Color) -> Color
-
-fn xyz(Double, Double, Double) -> Color
-
-fn xyz_to_linear(Color) -> Color
-
-fn xyz_to_luv(Color) -> Color
 
 // Errors
 
@@ -43,6 +12,22 @@ pub enum Color {
   XYZ(Double, Double, Double)
   LUV(Double, Double, Double)
 }
+fn Color::as_linear_rgb(Self) -> Self
+fn Color::as_luv(Self) -> Self
+fn Color::as_rgb(Self) -> Self
+fn Color::as_xyz(Self) -> Self
+fn Color::blend_linear(Self, Self, Double) -> Self
+fn Color::blend_rgb(Self, Self, Double) -> Self
+fn Color::from_linear(Self) -> Self
+fn Color::from_luv(Self) -> Self
+fn Color::from_xyz(Self) -> Self
+fn Color::linear_rgb(Double, Double, Double) -> Self
+fn Color::luv(Double, Double, Double) -> Self
+fn Color::rgb(Int, Int, Int) -> Self
+fn Color::to_linear(Self) -> Self
+fn Color::to_luv(Self) -> Self
+fn Color::to_xyz(Self) -> Self
+fn Color::xyz(Double, Double, Double) -> Self
 impl Show for Color
 
 // Type aliases

@@ -378,14 +378,14 @@ pub fn Color::blend_rgb(color1 : Color, color2 : Color, mix : Double) -> Color {
     (RGB(r1, g1, b1), RGB(r2, g2, b2)) => {
       let mix_clamped = clamp(mix, 0.0, 1.0)
       let r = (r1.to_double() * (1.0 - mix_clamped) +
-               r2.to_double() * mix_clamped +
-               0.5).to_int()
+      r2.to_double() * mix_clamped +
+      0.5).to_int()
       let g = (g1.to_double() * (1.0 - mix_clamped) +
-               g2.to_double() * mix_clamped +
-               0.5).to_int()
+      g2.to_double() * mix_clamped +
+      0.5).to_int()
       let b = (b1.to_double() * (1.0 - mix_clamped) +
-               b2.to_double() * mix_clamped +
-               0.5).to_int()
+      b2.to_double() * mix_clamped +
+      0.5).to_int()
       RGB(r, g, b)
     }
     _ => abort("Both colors must be RGB for RGB blending")
@@ -394,7 +394,11 @@ pub fn Color::blend_rgb(color1 : Color, color2 : Color, mix : Double) -> Color {
 
 ///|
 /// Blend two LinearRGB colors with a mixing ratio
-pub fn Color::blend_linear(color1 : Color, color2 : Color, mix : Double) -> Color {
+pub fn Color::blend_linear(
+  color1 : Color,
+  color2 : Color,
+  mix : Double,
+) -> Color {
   match (color1, color2) {
     (LinearRGB(r1, g1, b1), LinearRGB(r2, g2, b2)) => {
       let mix_clamped = clamp(mix, 0.0, 1.0)

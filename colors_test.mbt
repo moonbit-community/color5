@@ -397,6 +397,8 @@ test "blend clamping edge cases" {
     linear_red, linear_blue, -0.5,
   )
   inspect(linear_blend_negative, content="LinearRGB(1, 0, 0)")
-  let linear_blend_over_one = @colors.Color::blend_linear(linear_red, linear_blue, 1.5)
+  let linear_blend_over_one = @colors.Color::blend_linear(
+    linear_red, linear_blue, 1.5,
+  )
   inspect(linear_blend_over_one, content="LinearRGB(0, 0, 1)")
 }
