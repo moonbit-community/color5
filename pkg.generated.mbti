@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "dii/colors"
+package "bobzhang/colors"
 
 // Values
 fn blend_linear(Color, Color, Double) -> Color

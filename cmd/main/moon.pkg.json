@@ -1,9 +1,4 @@
 {
   "is-main": true,
-  "import": [
-    {
-      "path": "dii/colors",
-      "alias": "colors"
-    }
-  ]
+  "import": [ "bobzhang/colors"]
 }
