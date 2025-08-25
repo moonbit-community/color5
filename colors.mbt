@@ -1,8 +1,27 @@
 ///| Color type definitions and core functionality
-/// A pure MoonBit library for manipulating colors in different color spaces
+/// A comprehensive MoonBit library for manipulating colors in different color spaces
+/// with proper gamma correction and type safety.
+///
+/// This library provides an object-oriented API for working with colors across
+/// multiple color spaces: RGB, LinearRGB, XYZ, and CIE LUV.
 
 ///|
-/// Color type representing different color spaces
+/// Color type representing different color spaces.
+///
+/// # Color Spaces
+/// - `RGB(r, g, b)`: Standard sRGB with gamma encoding, values 0-255
+/// - `LinearRGB(r, g, b)`: Linear RGB without gamma encoding, values 0.0-1.0  
+/// - `XYZ(x, y, z)`: CIE XYZ color space, device-independent
+/// - `LUV(l, u, v)`: CIE LUV color space, perceptually uniform
+///
+/// # Example
+/// ```moonbit
+/// // Use constructor methods to create colors
+/// let red_rgb : Color = @colors.Color::rgb(255, 0, 0)
+/// let red_linear : Color = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
+/// let white_xyz : Color = @colors.Color::xyz(95.047, 100.0, 108.883)  // D65 white point
+/// let white_luv : Color = @colors.Color::luv(100.0, 0.0, 0.0)
+/// ```
 pub enum Color {
   RGB(Int, Int, Int) // Standard RGB (0-255)
   LinearRGB(Double, Double, Double) // Linear RGB (0.0-1.0)
@@ -79,8 +98,27 @@ fn matrix_multiply(
 ///| RGB color space functions
 
 ///|
-/// Create an RGB color from 8-bit values (0-255)
-pub fn rgb(r : Int, g : Int, b : Int) -> Color {
+/// Create an RGB color from 8-bit values (0-255).
+///
+/// Values are automatically clamped to the valid range [0, 255].
+/// This creates a color in the standard sRGB color space with gamma encoding.
+///
+/// # Parameters
+/// - `r`: Red component (0-255)
+/// - `g`: Green component (0-255)  
+/// - `b`: Blue component (0-255)
+///
+/// # Returns
+/// A new `Color` in RGB color space
+///
+/// # Example
+/// ```moonbit
+/// let red : Color = @colors.Color::rgb(255, 0, 0)
+/// let green : Color = @colors.Color::rgb(0, 255, 0)
+/// let blue : Color = @colors.Color::rgb(0, 0, 255)
+/// let clamped : Color = @colors.Color::rgb(300, -50, 128)  // becomes RGB(255, 0, 128)
+/// ```
+pub fn Color::rgb(r : Int, g : Int, b : Int) -> Color {
   let r_clamped = if r < 0 { 0 } else if r > 255 { 255 } else { r }
   let g_clamped = if g < 0 { 0 } else if g > 255 { 255 } else { g }
   let b_clamped = if b < 0 { 0 } else if b > 255 { 255 } else { b }
@@ -88,9 +126,30 @@ pub fn rgb(r : Int, g : Int, b : Int) -> Color {
 }
 
 ///|
-/// Convert RGB to LinearRGB
-pub fn rgb_to_linear(color : Color) -> Color {
-  match color {
+/// Convert RGB to LinearRGB with proper gamma correction.
+///
+/// This method applies the inverse sRGB gamma function to convert from
+/// gamma-encoded RGB values to linear RGB values. This is essential for
+/// accurate color calculations and blending.
+///
+/// # Parameters
+/// - `self`: Must be an RGB color
+///
+/// # Returns
+/// A new `Color` in LinearRGB color space
+///
+/// # Panics
+/// Aborts if the color is not in RGB color space
+///
+/// # Example
+/// ```moonbit
+/// let rgb_gray : Color = @colors.Color::rgb(128, 128, 128)
+/// let linear_gray : Color = rgb_gray.to_linear()
+/// // RGB(128, 128, 128) becomes approximately LinearRGB(0.22, 0.22, 0.22)
+/// // Note: Not 0.5 due to gamma correction!
+/// ```
+pub fn Color::to_linear(self : Color) -> Color {
+  match self {
     RGB(r, g, b) => {
       let r_norm = r.to_double() / 255.0
       let g_norm = g.to_double() / 255.0
@@ -106,9 +165,9 @@ pub fn rgb_to_linear(color : Color) -> Color {
 }
 
 ///|
-/// Convert LinearRGB to RGB
-pub fn linear_to_rgb(color : Color) -> Color {
-  match color {
+/// Convert LinearRGB to RGB  
+pub fn Color::from_linear(self : Color) -> Color {
+  match self {
     LinearRGB(r, g, b) => {
       let r_srgb = linear_to_srgb(r)
       let g_srgb = linear_to_srgb(g)
@@ -125,15 +184,34 @@ pub fn linear_to_rgb(color : Color) -> Color {
 ///| LinearRGB color space functions
 
 ///|
-/// Create a LinearRGB color from normalized values (0.0-1.0)
-pub fn linear_rgb(r : Double, g : Double, b : Double) -> Color {
+/// Create a LinearRGB color from normalized values (0.0-1.0).
+///
+/// Values are automatically clamped to the valid range [0.0, 1.0].
+/// This creates a color in linear RGB space without gamma encoding,
+/// which is ideal for lighting calculations and physically accurate blending.
+///
+/// # Parameters
+/// - `r`: Red component (0.0-1.0)
+/// - `g`: Green component (0.0-1.0)
+/// - `b`: Blue component (0.0-1.0)
+///
+/// # Returns
+/// A new `Color` in LinearRGB color space
+///
+/// # Example
+/// ```moonbit
+/// let linear_red : Color = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
+/// let linear_gray : Color = @colors.Color::linear_rgb(0.5, 0.5, 0.5)
+/// let clamped : Color = @colors.Color::linear_rgb(2.0, -0.5, 0.8)  // becomes LinearRGB(1.0, 0.0, 0.8)
+/// ```
+pub fn Color::linear_rgb(r : Double, g : Double, b : Double) -> Color {
   LinearRGB(clamp(r, 0.0, 1.0), clamp(g, 0.0, 1.0), clamp(b, 0.0, 1.0))
 }
 
 ///|
 /// Convert LinearRGB to XYZ
-pub fn linear_to_xyz(color : Color) -> Color {
-  match color {
+pub fn Color::to_xyz(self : Color) -> Color {
+  match self {
     LinearRGB(r, g, b) => {
       let (x, y, z) = matrix_multiply(srgb_to_xyz_matrix, (r, g, b))
       XYZ(x, y, z)
@@ -144,8 +222,8 @@ pub fn linear_to_xyz(color : Color) -> Color {
 
 ///|
 /// Convert XYZ to LinearRGB
-pub fn xyz_to_linear(color : Color) -> Color {
-  match color {
+pub fn Color::from_xyz(self : Color) -> Color {
+  match self {
     XYZ(x, y, z) => {
       let (r, g, b) = matrix_multiply(xyz_to_srgb_matrix, (x, y, z))
       LinearRGB(clamp(r, 0.0, 1.0), clamp(g, 0.0, 1.0), clamp(b, 0.0, 1.0))
@@ -158,14 +236,14 @@ pub fn xyz_to_linear(color : Color) -> Color {
 
 ///|
 /// Create an XYZ color
-pub fn xyz(x : Double, y : Double, z : Double) -> Color {
+pub fn Color::xyz(x : Double, y : Double, z : Double) -> Color {
   XYZ(x, y, z)
 }
 
 ///|
 /// Convert XYZ to LUV
-pub fn xyz_to_luv(color : Color) -> Color {
-  match color {
+pub fn Color::to_luv(self : Color) -> Color {
+  match self {
     XYZ(x, y, z) => {
       let (xn, yn, zn) = white_point_d65
 
@@ -198,8 +276,8 @@ pub fn xyz_to_luv(color : Color) -> Color {
 
 ///|
 /// Convert LUV to XYZ
-pub fn luv_to_xyz(color : Color) -> Color {
-  match color {
+pub fn Color::from_luv(self : Color) -> Color {
+  match self {
     LUV(l_star, u_star, v_star) => {
       let (xn, yn, zn) = white_point_d65
 
@@ -248,16 +326,41 @@ pub fn luv_to_xyz(color : Color) -> Color {
 
 ///|
 /// Create a LUV color
-pub fn luv(l : Double, u : Double, v : Double) -> Color {
+pub fn Color::luv(l : Double, u : Double, v : Double) -> Color {
   LUV(l, u, v)
 }
 
 ///| Color blending functions
+/// These static methods blend two colors of the same type.
 
 ///|
-/// Blend two RGB colors with a mixing ratio
-/// mix: 0.0 = first color, 1.0 = second color
-pub fn blend_rgb(color1 : Color, color2 : Color, mix : Double) -> Color {
+/// Blend two RGB colors with a mixing ratio.
+///
+/// This method performs gamma-aware blending in RGB space. While not as
+/// physically accurate as linear blending, it's suitable for UI colors
+/// and simple color mixing.
+///
+/// # Parameters
+/// - `color1`: First RGB color
+/// - `color2`: Second RGB color  
+/// - `mix`: Mixing ratio (0.0 = 100% first color, 1.0 = 100% second color)
+///
+/// # Returns
+/// A new `Color` representing the blended result
+///
+/// # Panics
+/// Aborts if either color is not in RGB color space
+///
+/// # Example
+/// ```moonbit
+/// let red : Color = @colors.Color::rgb(255, 0, 0)
+/// let blue : Color = @colors.Color::rgb(0, 0, 255)
+/// 
+/// let purple : Color = @colors.Color::blend_rgb(red, blue, 0.5)  // RGB(128, 0, 128)
+/// let mostly_red : Color = @colors.Color::blend_rgb(red, blue, 0.25)  // RGB(192, 0, 64)
+/// let mostly_blue : Color = @colors.Color::blend_rgb(red, blue, 0.75)  // RGB(64, 0, 192)
+/// ```
+pub fn Color::blend_rgb(color1 : Color, color2 : Color, mix : Double) -> Color {
   match (color1, color2) {
     (RGB(r1, g1, b1), RGB(r2, g2, b2)) => {
       let mix_clamped = clamp(mix, 0.0, 1.0)
@@ -278,7 +381,7 @@ pub fn blend_rgb(color1 : Color, color2 : Color, mix : Double) -> Color {
 
 ///|
 /// Blend two LinearRGB colors with a mixing ratio
-pub fn blend_linear(color1 : Color, color2 : Color, mix : Double) -> Color {
+pub fn Color::blend_linear(color1 : Color, color2 : Color, mix : Double) -> Color {
   match (color1, color2) {
     (LinearRGB(r1, g1, b1), LinearRGB(r2, g2, b2)) => {
       let mix_clamped = clamp(mix, 0.0, 1.0)
@@ -291,48 +394,72 @@ pub fn blend_linear(color1 : Color, color2 : Color, mix : Double) -> Color {
   }
 }
 
-///| Conversion helper functions
+///| Universal conversion methods
+/// These methods can convert from any color space to any other color space,
+/// performing all necessary intermediate conversions automatically.
 
 ///|
-/// Convert any color to RGB
-pub fn to_rgb(color : Color) -> Color {
-  match color {
-    RGB(_, _, _) => color
-    LinearRGB(_, _, _) => linear_to_rgb(color)
-    XYZ(_, _, _) => linear_to_rgb(xyz_to_linear(color))
-    LUV(_, _, _) => linear_to_rgb(xyz_to_linear(luv_to_xyz(color)))
+/// Convert any color to RGB color space.
+///
+/// This method performs all necessary intermediate conversions to transform
+/// the color from any supported color space to RGB. The conversion path is:
+/// - RGB → RGB (identity)
+/// - LinearRGB → RGB (gamma correction)
+/// - XYZ → LinearRGB → RGB
+/// - LUV → XYZ → LinearRGB → RGB
+///
+/// # Parameters
+/// - `self`: Color in any supported color space
+///
+/// # Returns
+/// A new `Color` in RGB color space
+///
+/// # Example
+/// ```moonbit
+/// let xyz_color : Color = @colors.Color::xyz(41.24, 21.26, 1.93)
+/// let rgb_color : Color = xyz_color.as_rgb()  // Converts XYZ → LinearRGB → RGB
+///
+/// let luv_color : Color = @colors.Color::luv(53.24, 175.05, 37.75)
+/// let rgb_from_luv : Color = luv_color.as_rgb()  // Converts LUV → XYZ → LinearRGB → RGB
+/// ```
+pub fn Color::as_rgb(self : Color) -> Color {
+  match self {
+    RGB(_, _, _) => self
+    LinearRGB(_, _, _) => self.from_linear()
+    XYZ(_, _, _) => self.from_xyz().from_linear()
+    LUV(_, _, _) => self.from_luv().from_xyz().from_linear()
   }
 }
 
 ///|
 /// Convert any color to LinearRGB
-pub fn to_linear_rgb(color : Color) -> Color {
-  match color {
-    RGB(_, _, _) => rgb_to_linear(color)
-    LinearRGB(_, _, _) => color
-    XYZ(_, _, _) => xyz_to_linear(color)
-    LUV(_, _, _) => xyz_to_linear(luv_to_xyz(color))
+pub fn Color::as_linear_rgb(self : Color) -> Color {
+  match self {
+    RGB(_, _, _) => self.to_linear()
+    LinearRGB(_, _, _) => self
+    XYZ(_, _, _) => self.from_xyz()
+    LUV(_, _, _) => self.from_luv().from_xyz()
   }
 }
 
 ///|
 /// Convert any color to XYZ
-pub fn to_xyz(color : Color) -> Color {
-  match color {
-    RGB(_, _, _) => linear_to_xyz(rgb_to_linear(color))
-    LinearRGB(_, _, _) => linear_to_xyz(color)
-    XYZ(_, _, _) => color
-    LUV(_, _, _) => luv_to_xyz(color)
+pub fn Color::as_xyz(self : Color) -> Color {
+  match self {
+    RGB(_, _, _) => self.to_linear().to_xyz()
+    LinearRGB(_, _, _) => self.to_xyz()
+    XYZ(_, _, _) => self
+    LUV(_, _, _) => self.from_luv()
   }
 }
 
 ///|
 /// Convert any color to LUV
-pub fn to_luv(color : Color) -> Color {
-  match color {
-    RGB(_, _, _) => xyz_to_luv(linear_to_xyz(rgb_to_linear(color)))
-    LinearRGB(_, _, _) => xyz_to_luv(linear_to_xyz(color))
-    XYZ(_, _, _) => xyz_to_luv(color)
-    LUV(_, _, _) => color
+pub fn Color::as_luv(self : Color) -> Color {
+  match self {
+    RGB(_, _, _) => self.to_linear().to_xyz().to_luv()
+    LinearRGB(_, _, _) => self.to_xyz().to_luv()
+    XYZ(_, _, _) => self.to_luv()
+    LUV(_, _, _) => self
   }
 }

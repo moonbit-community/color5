@@ -5,49 +5,49 @@
 /// RGB color space tests
 test "rgb creation and clamping" {
   // Test normal RGB values
-  let red = @colors.rgb(255, 0, 0)
+  let red = @colors.Color::rgb(255, 0, 0)
   inspect(red, content="RGB(255, 0, 0)")
-  let green = @colors.rgb(0, 255, 0)
+  let green = @colors.Color::rgb(0, 255, 0)
   inspect(green, content="RGB(0, 255, 0)")
-  let blue = @colors.rgb(0, 0, 255)
+  let blue = @colors.Color::rgb(0, 0, 255)
   inspect(blue, content="RGB(0, 0, 255)")
 
   // Test clamping of out-of-range values
-  let clamped_high = @colors.rgb(300, 400, 500)
+  let clamped_high = @colors.Color::rgb(300, 400, 500)
   inspect(clamped_high, content="RGB(255, 255, 255)")
-  let clamped_low = @colors.rgb(-50, -100, -200)
+  let clamped_low = @colors.Color::rgb(-50, -100, -200)
   inspect(clamped_low, content="RGB(0, 0, 0)")
 
   // Test mixed clamping
-  let mixed = @colors.rgb(-10, 128, 300)
+  let mixed = @colors.Color::rgb(-10, 128, 300)
   inspect(mixed, content="RGB(0, 128, 255)")
 }
 
 ///|
 test "rgb blending" {
-  let black = @colors.rgb(0, 0, 0)
-  let white = @colors.rgb(255, 255, 255)
+  let black = @colors.Color::rgb(0, 0, 0)
+  let white = @colors.Color::rgb(255, 255, 255)
 
   // Test 50% blend (should give gray)
-  let gray = @colors.blend_rgb(black, white, 0.5)
+  let gray = @colors.Color::blend_rgb(black, white, 0.5)
   inspect(gray, content="RGB(128, 128, 128)")
 
   // Test 0% blend (should be first color)
-  let first = @colors.blend_rgb(black, white, 0.0)
+  let first = @colors.Color::blend_rgb(black, white, 0.0)
   inspect(first, content="RGB(0, 0, 0)")
 
   // Test 100% blend (should be second color)
-  let second = @colors.blend_rgb(black, white, 1.0)
+  let second = @colors.Color::blend_rgb(black, white, 1.0)
   inspect(second, content="RGB(255, 255, 255)")
 
   // Test 25% blend
-  let quarter = @colors.blend_rgb(black, white, 0.25)
+  let quarter = @colors.Color::blend_rgb(black, white, 0.25)
   inspect(quarter, content="RGB(64, 64, 64)")
 
   // Test with colored values
-  let red = @colors.rgb(255, 0, 0)
-  let blue = @colors.rgb(0, 0, 255)
-  let purple = @colors.blend_rgb(red, blue, 0.5)
+  let red = @colors.Color::rgb(255, 0, 0)
+  let blue = @colors.Color::rgb(0, 0, 255)
+  let purple = @colors.Color::blend_rgb(red, blue, 0.5)
   inspect(purple, content="RGB(128, 0, 128)")
 }
 
@@ -55,29 +55,29 @@ test "rgb blending" {
 /// LinearRGB color space tests
 test "linear_rgb creation and clamping" {
   // Test normal LinearRGB values
-  let red = @colors.linear_rgb(1.0, 0.0, 0.0)
+  let red = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
   inspect(red, content="LinearRGB(1, 0, 0)")
-  let half_gray = @colors.linear_rgb(0.5, 0.5, 0.5)
+  let half_gray = @colors.Color::linear_rgb(0.5, 0.5, 0.5)
   inspect(half_gray, content="LinearRGB(0.5, 0.5, 0.5)")
 
   // Test clamping
-  let clamped = @colors.linear_rgb(2.0, -0.5, 1.5)
+  let clamped = @colors.Color::linear_rgb(2.0, -0.5, 1.5)
   inspect(clamped, content="LinearRGB(1, 0, 1)")
 }
 
 ///|
 test "rgb to linear conversion" {
   // Test pure colors
-  let rgb_red = @colors.rgb(255, 0, 0)
-  let linear_red = @colors.rgb_to_linear(rgb_red)
+  let rgb_red = @colors.Color::rgb(255, 0, 0)
+  let linear_red = rgb_red.to_linear()
   inspect(linear_red, content="LinearRGB(1, 0, 0)")
-  let rgb_black = @colors.rgb(0, 0, 0)
-  let linear_black = @colors.rgb_to_linear(rgb_black)
+  let rgb_black = @colors.Color::rgb(0, 0, 0)
+  let linear_black = rgb_black.to_linear()
   inspect(linear_black, content="LinearRGB(0, 0, 0)")
 
   // Test mid-gray (should not be 0.5 due to gamma correction)
-  let rgb_mid = @colors.rgb(128, 128, 128)
-  let linear_mid = @colors.rgb_to_linear(rgb_mid)
+  let rgb_mid = @colors.Color::rgb(128, 128, 128)
+  let linear_mid = rgb_mid.to_linear()
   // The actual value should be around 0.2158 due to gamma correction
   match linear_mid {
     LinearRGB(r, _, _) => {
@@ -92,9 +92,9 @@ test "rgb to linear conversion" {
 ///|
 test "linear to rgb conversion" {
   // Test round-trip conversion
-  let original = @colors.rgb(200, 100, 50)
-  let linear = @colors.rgb_to_linear(original)
-  let back_to_rgb = @colors.linear_to_rgb(linear)
+  let original = @colors.Color::rgb(200, 100, 50)
+  let linear = original.to_linear()
+  let back_to_rgb = linear.from_linear()
 
   // Should be very close to original (within rounding error)
   match (original, back_to_rgb) {
@@ -111,30 +111,30 @@ test "linear to rgb conversion" {
 
 ///|
 test "linear rgb blending" {
-  let linear_black = @colors.linear_rgb(0.0, 0.0, 0.0)
-  let linear_white = @colors.linear_rgb(1.0, 1.0, 1.0)
-  let linear_gray = @colors.blend_linear(linear_black, linear_white, 0.5)
+  let linear_black = @colors.Color::linear_rgb(0.0, 0.0, 0.0)
+  let linear_white = @colors.Color::linear_rgb(1.0, 1.0, 1.0)
+  let linear_gray = @colors.Color::blend_linear(linear_black, linear_white, 0.5)
   inspect(linear_gray, content="LinearRGB(0.5, 0.5, 0.5)")
-  let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
-  let linear_blue = @colors.linear_rgb(0.0, 0.0, 1.0)
-  let linear_purple = @colors.blend_linear(linear_red, linear_blue, 0.5)
+  let linear_red = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
+  let linear_blue = @colors.Color::linear_rgb(0.0, 0.0, 1.0)
+  let linear_purple = @colors.Color::blend_linear(linear_red, linear_blue, 0.5)
   inspect(linear_purple, content="LinearRGB(0.5, 0, 0.5)")
 }
 
 ///|
 /// XYZ color space tests
 test "xyz creation" {
-  let xyz_white = @colors.xyz(95.047, 100.0, 108.883) // D65 white point
+  let xyz_white = @colors.Color::xyz(95.047, 100.0, 108.883) // D65 white point
   inspect(xyz_white, content="XYZ(95.047, 100, 108.883)")
-  let xyz_black = @colors.xyz(0.0, 0.0, 0.0)
+  let xyz_black = @colors.Color::xyz(0.0, 0.0, 0.0)
   inspect(xyz_black, content="XYZ(0, 0, 0)")
 }
 
 ///|
 test "linear to xyz conversion" {
   // Test white point conversion
-  let linear_white = @colors.linear_rgb(1.0, 1.0, 1.0)
-  let xyz_white = @colors.linear_to_xyz(linear_white)
+  let linear_white = @colors.Color::linear_rgb(1.0, 1.0, 1.0)
+  let xyz_white = linear_white.to_xyz()
 
   // Should be close to D65 white point
   match xyz_white {
@@ -149,17 +149,17 @@ test "linear to xyz conversion" {
   }
 
   // Test black point
-  let linear_black = @colors.linear_rgb(0.0, 0.0, 0.0)
-  let xyz_black = @colors.linear_to_xyz(linear_black)
+  let linear_black = @colors.Color::linear_rgb(0.0, 0.0, 0.0)
+  let xyz_black = linear_black.to_xyz()
   inspect(xyz_black, content="XYZ(0, 0, 0)")
 }
 
 ///|
 test "xyz to linear conversion" {
   // Test round-trip conversion
-  let original_linear = @colors.linear_rgb(0.8, 0.6, 0.4)
-  let xyz_converted = @colors.linear_to_xyz(original_linear)
-  let back_to_linear = @colors.xyz_to_linear(xyz_converted)
+  let original_linear = @colors.Color::linear_rgb(0.8, 0.6, 0.4)
+  let xyz_converted = original_linear.to_xyz()
+  let back_to_linear = xyz_converted.from_xyz()
 
   // Should be very close to original
   match (original_linear, back_to_linear) {
@@ -177,17 +177,17 @@ test "xyz to linear conversion" {
 ///|
 /// LUV color space tests
 test "luv creation" {
-  let luv_white = @colors.luv(100.0, 0.0, 0.0) // L*=100 for white
+  let luv_white = @colors.Color::luv(100.0, 0.0, 0.0) // L*=100 for white
   inspect(luv_white, content="LUV(100, 0, 0)")
-  let luv_black = @colors.luv(0.0, 0.0, 0.0)
+  let luv_black = @colors.Color::luv(0.0, 0.0, 0.0)
   inspect(luv_black, content="LUV(0, 0, 0)")
 }
 
 ///|
 test "xyz to luv conversion" {
   // Test white point (D65)
-  let xyz_white = @colors.xyz(95.047, 100.0, 108.883)
-  let luv_white = @colors.xyz_to_luv(xyz_white)
+  let xyz_white = @colors.Color::xyz(95.047, 100.0, 108.883)
+  let luv_white = xyz_white.to_luv()
 
   // White point should have L*=100, u*≈0, v*≈0
   match luv_white {
@@ -202,17 +202,17 @@ test "xyz to luv conversion" {
   }
 
   // Test black point
-  let xyz_black = @colors.xyz(0.0, 0.0, 0.0)
-  let luv_black = @colors.xyz_to_luv(xyz_black)
+  let xyz_black = @colors.Color::xyz(0.0, 0.0, 0.0)
+  let luv_black = xyz_black.to_luv()
   inspect(luv_black, content="LUV(0, 0, 0)")
 }
 
 ///|
 test "luv to xyz conversion" {
   // Test round-trip conversion
-  let original_xyz = @colors.xyz(50.0, 60.0, 70.0)
-  let luv_converted = @colors.xyz_to_luv(original_xyz)
-  let back_to_xyz = @colors.luv_to_xyz(luv_converted)
+  let original_xyz = @colors.Color::xyz(50.0, 60.0, 70.0)
+  let luv_converted = original_xyz.to_luv()
+  let back_to_xyz = luv_converted.from_luv()
 
   // Should be very close to original
   match (original_xyz, back_to_xyz) {
@@ -231,15 +231,15 @@ test "luv to xyz conversion" {
 /// Universal conversion tests
 test "universal color conversions" {
   // Test converting through all color spaces
-  let original_rgb = @colors.rgb(200, 150, 100)
+  let original_rgb = @colors.Color::rgb(200, 150, 100)
 
   // RGB -> LinearRGB -> XYZ -> LUV -> XYZ -> LinearRGB -> RGB
-  let step1 = @colors.to_linear_rgb(original_rgb)
-  let step2 = @colors.to_xyz(step1)
-  let step3 = @colors.to_luv(step2)
-  let step4 = @colors.to_xyz(step3)
-  let step5 = @colors.to_linear_rgb(step4)
-  let final_rgb = @colors.to_rgb(step5)
+  let step1 = original_rgb.as_linear_rgb()
+  let step2 = step1.as_xyz()
+  let step3 = step2.as_luv()
+  let step4 = step3.as_xyz()
+  let step5 = step4.as_linear_rgb()
+  let final_rgb = step5.as_rgb()
 
   // Should be very close to original
   match (original_rgb, final_rgb) {
@@ -256,17 +256,17 @@ test "universal color conversions" {
 
 ///|
 test "direct conversion functions" {
-  let rgb_color = @colors.rgb(128, 64, 192)
+  let rgb_color = @colors.Color::rgb(128, 64, 192)
 
   // Test all conversion functions
-  let as_linear = @colors.to_linear_rgb(rgb_color)
-  let as_xyz = @colors.to_xyz(rgb_color)
-  let as_luv = @colors.to_luv(rgb_color)
+  let as_linear = rgb_color.as_linear_rgb()
+  let as_xyz = rgb_color.as_xyz()
+  let as_luv = rgb_color.as_luv()
 
   // Convert back to RGB and check consistency
-  let back_from_linear = @colors.to_rgb(as_linear)
-  let back_from_xyz = @colors.to_rgb(as_xyz)
-  let back_from_luv = @colors.to_rgb(as_luv)
+  let back_from_linear = as_linear.as_rgb()
+  let back_from_xyz = as_xyz.as_rgb()
+  let back_from_luv = as_luv.as_rgb()
 
   // All should be close to original
   match (rgb_color, back_from_linear, back_from_xyz, back_from_luv) {
@@ -291,9 +291,9 @@ test "direct conversion functions" {
 /// Edge case tests
 test "edge cases and boundary conditions" {
   // Test very small values
-  let tiny_rgb = @colors.rgb(1, 1, 1)
-  let tiny_linear = @colors.rgb_to_linear(tiny_rgb)
-  let back_tiny = @colors.linear_to_rgb(tiny_linear)
+  let tiny_rgb = @colors.Color::rgb(1, 1, 1)
+  let tiny_linear = tiny_rgb.to_linear()
+  let back_tiny = tiny_linear.from_linear()
   match (tiny_rgb, back_tiny) {
     (RGB(r1, g1, b1), RGB(r2, g2, b2)) => {
       let diff_r = if r1 > r2 { r1 - r2 } else { r2 - r1 }
@@ -306,8 +306,8 @@ test "edge cases and boundary conditions" {
   }
 
   // Test very large XYZ values
-  let large_xyz = @colors.xyz(200.0, 200.0, 200.0)
-  let clamped_linear = @colors.xyz_to_linear(large_xyz)
+  let large_xyz = @colors.Color::xyz(200.0, 200.0, 200.0)
+  let clamped_linear = large_xyz.from_xyz()
   match clamped_linear {
     LinearRGB(r, g, b) => {
       // Should be clamped to [0, 1]
@@ -323,10 +323,10 @@ test "edge cases and boundary conditions" {
   }
 
   // Test zero values in LUV conversion
-  let zero_xyz = @colors.xyz(0.0, 0.0, 0.0)
-  let zero_luv = @colors.xyz_to_luv(zero_xyz)
+  let zero_xyz = @colors.Color::xyz(0.0, 0.0, 0.0)
+  let zero_luv = zero_xyz.to_luv()
   inspect(zero_luv, content="LUV(0, 0, 0)")
-  let back_zero = @colors.luv_to_xyz(zero_luv)
+  let back_zero = zero_luv.from_luv()
   inspect(back_zero, content="XYZ(0, 0, 0)")
 }
 
@@ -334,8 +334,8 @@ test "edge cases and boundary conditions" {
 /// Known color value tests (for validation against reference implementations)
 test "known color values" {
   // Test sRGB red -> XYZ (known reference values)
-  let srgb_red = @colors.rgb(255, 0, 0)
-  let xyz_red = @colors.to_xyz(srgb_red)
+  let srgb_red = @colors.Color::rgb(255, 0, 0)
+  let xyz_red = srgb_red.as_xyz()
   match xyz_red {
     XYZ(x, y, z) => {
       // Reference values for sRGB red in XYZ (approximately)
@@ -349,8 +349,8 @@ test "known color values" {
   }
 
   // Test sRGB green -> XYZ
-  let srgb_green = @colors.rgb(0, 255, 0)
-  let xyz_green = @colors.to_xyz(srgb_green)
+  let srgb_green = @colors.Color::rgb(0, 255, 0)
+  let xyz_green = srgb_green.as_xyz()
   match xyz_green {
     XYZ(x, y, z) => {
       // Reference values for sRGB green in XYZ (approximately)
@@ -364,8 +364,8 @@ test "known color values" {
   }
 
   // Test sRGB blue -> XYZ
-  let srgb_blue = @colors.rgb(0, 0, 255)
-  let xyz_blue = @colors.to_xyz(srgb_blue)
+  let srgb_blue = @colors.Color::rgb(0, 0, 255)
+  let xyz_blue = srgb_blue.as_xyz()
   match xyz_blue {
     XYZ(x, y, z) => {
       // Reference values for sRGB blue in XYZ (approximately)
@@ -381,22 +381,22 @@ test "known color values" {
 
 ///|
 test "blend clamping edge cases" {
-  let red = @colors.rgb(255, 0, 0)
-  let blue = @colors.rgb(0, 0, 255)
+  let red = @colors.Color::rgb(255, 0, 0)
+  let blue = @colors.Color::rgb(0, 0, 255)
 
   // Test blend with values outside [0, 1]
-  let blend_negative = @colors.blend_rgb(red, blue, -0.5)
+  let blend_negative = @colors.Color::blend_rgb(red, blue, -0.5)
   inspect(blend_negative, content="RGB(255, 0, 0)") // Should clamp to first color
-  let blend_over_one = @colors.blend_rgb(red, blue, 1.5)
+  let blend_over_one = @colors.Color::blend_rgb(red, blue, 1.5)
   inspect(blend_over_one, content="RGB(0, 0, 255)") // Should clamp to second color
 
   // Test linear blend clamping
-  let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
-  let linear_blue = @colors.linear_rgb(0.0, 0.0, 1.0)
-  let linear_blend_negative = @colors.blend_linear(
+  let linear_red = @colors.Color::linear_rgb(1.0, 0.0, 0.0)
+  let linear_blue = @colors.Color::linear_rgb(0.0, 0.0, 1.0)
+  let linear_blend_negative = @colors.Color::blend_linear(
     linear_red, linear_blue, -0.5,
   )
   inspect(linear_blend_negative, content="LinearRGB(1, 0, 0)")
-  let linear_blend_over_one = @colors.blend_linear(linear_red, linear_blue, 1.5)
+  let linear_blend_over_one = @colors.Color::blend_linear(linear_red, linear_blue, 1.5)
   inspect(linear_blend_over_one, content="LinearRGB(0, 0, 1)")
 }
