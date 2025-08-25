@@ -66,6 +66,10 @@ pub struct LUVColor {
   u : Double
   v : Double
 }
+impl ToLUV for LUVColor
+impl ToLinearRGB for LUVColor
+impl ToRGB for LUVColor
+impl ToXYZ for LUVColor
 impl Show for LUVColor
 
 pub struct LinearRGBColor {
@@ -73,6 +77,11 @@ pub struct LinearRGBColor {
   g : Double
   b : Double
 }
+impl Blend for LinearRGBColor
+impl ToLUV for LinearRGBColor
+impl ToLinearRGB for LinearRGBColor
+impl ToRGB for LinearRGBColor
+impl ToXYZ for LinearRGBColor
 impl Show for LinearRGBColor
 
 pub struct RGBColor {
@@ -80,6 +89,11 @@ pub struct RGBColor {
   g : Int
   b : Int
 }
+impl Blend for RGBColor
+impl ToLUV for RGBColor
+impl ToLinearRGB for RGBColor
+impl ToRGB for RGBColor
+impl ToXYZ for RGBColor
 impl Show for RGBColor
 
 pub struct XYZColor {
@@ -87,9 +101,32 @@ pub struct XYZColor {
   y : Double
   z : Double
 }
+impl ToLUV for XYZColor
+impl ToLinearRGB for XYZColor
+impl ToRGB for XYZColor
+impl ToXYZ for XYZColor
 impl Show for XYZColor
 
 // Type aliases
 
 // Traits
+pub trait Blend {
+  blend(Self, Self, Double) -> Self
+}
+
+pub trait ToLUV {
+  to_luv(Self) -> LUVColor
+}
+
+pub trait ToLinearRGB {
+  to_linear_rgb(Self) -> LinearRGBColor
+}
+
+pub trait ToRGB {
+  to_rgb(Self) -> RGBColor
+}
+
+pub trait ToXYZ {
+  to_xyz(Self) -> XYZColor
+}
 

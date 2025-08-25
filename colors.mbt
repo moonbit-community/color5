@@ -11,16 +11,141 @@
 ///
 /// # Example
 /// ```moonbit
-/// let red = rgb(255, 0, 0)
-/// let clamped = rgb(300, -50, 128)  // becomes RGBColor(255, 0, 128)
+/// let red = @colors.rgb(255, 0, 0)
+/// let _clamped = @colors.rgb(300, -50, 128)  // becomes RGBColor(255, 0, 128)
 /// 
 /// inspect(red, content="RGBColor({ {r: 255, g: 0, b: 0 }})")
 /// ```
 pub struct RGBColor {
-  r: Int
-  g: Int
-  b: Int
+  r : Int
+  g : Int
+  b : Int
 } derive(Show)
+
+// Conversion traits for organizing the API
+
+///|
+pub trait ToRGB {
+  to_rgb(Self) -> RGBColor
+}
+
+///|
+pub trait ToLinearRGB {
+  to_linear_rgb(Self) -> LinearRGBColor
+}
+
+///|
+pub trait ToXYZ {
+  to_xyz(Self) -> XYZColor
+}
+
+///|
+pub trait ToLUV {
+  to_luv(Self) -> LUVColor
+}
+
+///|
+pub trait Blend {
+  blend(Self, Self, Double) -> Self
+}
+
+// Trait implementations for RGBColor
+
+///|
+pub impl ToRGB for RGBColor with to_rgb(self) {
+  self
+}
+
+///|
+pub impl ToLinearRGB for RGBColor with to_linear_rgb(self) {
+  rgb_to_linear(self)
+}
+
+///|
+pub impl ToXYZ for RGBColor with to_xyz(self) {
+  linear_to_xyz(rgb_to_linear(self))
+}
+
+///|
+pub impl ToLUV for RGBColor with to_luv(self) {
+  xyz_to_luv(linear_to_xyz(rgb_to_linear(self)))
+}
+
+///|
+pub impl Blend for RGBColor with blend(self, other, mix) {
+  rgb_blend(self, other, mix)
+}
+
+// Trait implementations for LinearRGBColor
+
+///|
+pub impl ToRGB for LinearRGBColor with to_rgb(self) {
+  linear_to_rgb(self)
+}
+
+///|
+pub impl ToLinearRGB for LinearRGBColor with to_linear_rgb(self) {
+  self
+}
+
+///|
+pub impl ToXYZ for LinearRGBColor with to_xyz(self) {
+  linear_to_xyz(self)
+}
+
+///|
+pub impl ToLUV for LinearRGBColor with to_luv(self) {
+  xyz_to_luv(linear_to_xyz(self))
+}
+
+///|
+pub impl Blend for LinearRGBColor with blend(self, other, mix) {
+  linear_blend(self, other, mix)
+}
+
+// Trait implementations for XYZColor
+
+///|
+pub impl ToRGB for XYZColor with to_rgb(self) {
+  linear_to_rgb(xyz_to_linear(self))
+}
+
+///|
+pub impl ToLinearRGB for XYZColor with to_linear_rgb(self) {
+  xyz_to_linear(self)
+}
+
+///|
+pub impl ToXYZ for XYZColor with to_xyz(self) {
+  self
+}
+
+///|
+pub impl ToLUV for XYZColor with to_luv(self) {
+  xyz_to_luv(self)
+}
+
+// Trait implementations for LUVColor
+
+///|
+pub impl ToRGB for LUVColor with to_rgb(self) {
+  linear_to_rgb(xyz_to_linear(luv_to_xyz(self)))
+}
+
+///|
+pub impl ToLinearRGB for LUVColor with to_linear_rgb(self) {
+  xyz_to_linear(luv_to_xyz(self))
+}
+
+///|
+pub impl ToXYZ for LUVColor with to_xyz(self) {
+  luv_to_xyz(self)
+}
+
+///|
+pub impl ToLUV for LUVColor with to_luv(self) {
+  self
+}
 
 ///|
 /// LinearRGB color type representing linear RGB without gamma encoding.
@@ -29,15 +154,15 @@ pub struct RGBColor {
 ///
 /// # Example
 /// ```moonbit
-/// let linear_red = linear_rgb(1.0, 0.0, 0.0)
-/// let clamped = linear_rgb(2.0, -0.5, 0.8)  // becomes LinearRGBColor(1.0, 0.0, 0.8)
+/// let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
+/// let _clamped = @colors.linear_rgb(2.0, -0.5, 0.8)  // becomes LinearRGBColor(1.0, 0.0, 0.8)
 /// 
 /// inspect(linear_red, content="LinearRGBColor({ {r: 1, g: 0, b: 0 }})")
 /// ```
 pub struct LinearRGBColor {
-  r: Double
-  g: Double
-  b: Double
+  r : Double
+  g : Double
+  b : Double
 } derive(Show)
 
 ///|
@@ -46,14 +171,14 @@ pub struct LinearRGBColor {
 ///
 /// # Example
 /// ```moonbit
-/// let xyz_white = xyz(95.047, 100.0, 108.883)  // D65 white point
+/// let xyz_white = @colors.xyz(95.047, 100.0, 108.883)  // D65 white point
 /// 
 /// inspect(xyz_white, content="XYZColor({ {x: 95.047, y: 100, z: 108.883 }})")
 /// ```
 pub struct XYZColor {
-  x: Double
-  y: Double
-  z: Double
+  x : Double
+  y : Double
+  z : Double
 } derive(Show)
 
 ///|
@@ -62,14 +187,14 @@ pub struct XYZColor {
 ///
 /// # Example
 /// ```moonbit
-/// let luv_white = luv(100.0, 0.0, 0.0)  // L*=100 for white
+/// let luv_white = @colors.luv(100.0, 0.0, 0.0)  // L*=100 for white
 /// 
 /// inspect(luv_white, content="LUVColor({ {l: 100, u: 0, v: 0 }})")
 /// ```
 pub struct LUVColor {
-  l: Double
-  u: Double
-  v: Double
+  l : Double
+  u : Double
+  v : Double
 } derive(Show)
 
 ///|
@@ -77,24 +202,37 @@ pub struct LUVColor {
 let srgb_to_xyz_matrix : Array[Array[Double]] = [
   [0.4124564, 0.3575761, 0.1804375],
   [0.2126729, 0.7151522, 0.0721750],
-  [0.0193339, 0.1191920, 0.9503041]
+  [0.0193339, 0.1191920, 0.9503041],
 ]
 
+///|
 let xyz_to_srgb_matrix : Array[Array[Double]] = [
   [3.2404542, -1.5371385, -0.4985314],
   [-0.9692660, 1.8760108, 0.0415560],
-  [0.0556434, -0.2040259, 1.0572252]
+  [0.0556434, -0.2040259, 1.0572252],
 ]
 
 // D65 white point for LUV conversions
+
+///|
 let d65_white_x : Double = 95.047
+
+///|
 let d65_white_y : Double = 100.0
+
+///|
 let d65_white_z : Double = 108.883
 
 ///|
 /// Utility function to clamp a value between min and max
 fn clamp(value : Double, min : Double, max : Double) -> Double {
-  if value < min { min } else if value > max { max } else { value }
+  if value < min {
+    min
+  } else if value > max {
+    max
+  } else {
+    value
+  }
 }
 
 ///|
@@ -119,7 +257,12 @@ fn linear_to_srgb(value : Double) -> Double {
 
 ///|
 /// Matrix multiplication helper for color space conversions
-fn apply_matrix(matrix : Array[Array[Double]], x : Double, y : Double, z : Double) -> (Double, Double, Double) {
+fn apply_matrix(
+  matrix : Array[Array[Double]],
+  x : Double,
+  y : Double,
+  z : Double,
+) -> (Double, Double, Double) {
   let r = matrix[0][0] * x + matrix[0][1] * y + matrix[0][2] * z
   let g = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z
   let b = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z
@@ -143,8 +286,8 @@ fn apply_matrix(matrix : Array[Array[Double]], x : Double, y : Double, z : Doubl
 ///
 /// # Example
 /// ```moonbit
-/// let red = rgb(255, 0, 0)
-/// let clamped = rgb(300, -50, 128)  // becomes RGBColor(255, 0, 128)
+/// let red = @colors.rgb(255, 0, 0)
+/// let _clamped = @colors.rgb(300, -50, 128)  // becomes RGBColor(255, 0, 128)
 /// 
 /// inspect(red, content="RGBColor({ {r: 255, g: 0, b: 0 }})")
 /// ```
@@ -166,8 +309,8 @@ pub fn rgb(r : Int, g : Int, b : Int) -> RGBColor {
 ///
 /// # Example
 /// ```moonbit
-/// let rgb_gray = rgb(128, 128, 128)
-/// let linear_gray = rgb_to_linear(rgb_gray)
+/// let rgb_gray = @colors.rgb(128, 128, 128)
+/// let _linear_gray = @colors.rgb_to_linear(rgb_gray)
 /// // RGB(128, 128, 128) becomes approximately LinearRGB(0.22, 0.22, 0.22)
 /// 
 /// inspect(rgb_gray, content="RGBColor({ {r: 128, g: 128, b: 128 }})")
@@ -176,12 +319,11 @@ pub fn rgb_to_linear(color : RGBColor) -> LinearRGBColor {
   let r_norm = color.r.to_double() / 255.0
   let g_norm = color.g.to_double() / 255.0
   let b_norm = color.b.to_double() / 255.0
-  
   linear_rgb(
-        srgb_to_linear(r_norm),
-        srgb_to_linear(g_norm),
-    srgb_to_linear(b_norm)
-      )
+    srgb_to_linear(r_norm),
+    srgb_to_linear(g_norm),
+    srgb_to_linear(b_norm),
+  )
 }
 
 ///|
@@ -197,23 +339,27 @@ pub fn rgb_to_linear(color : RGBColor) -> LinearRGBColor {
 ///
 /// # Example
 /// ```moonbit
-/// let red = rgb(255, 0, 0)
-/// let blue = rgb(0, 0, 255)
-/// let purple = rgb_blend(red, blue, 0.5)
+/// let red = @colors.rgb(255, 0, 0)
+/// let blue = @colors.rgb(0, 0, 255)
+/// let purple = @colors.rgb_blend(red, blue, 0.5)
 /// 
 /// inspect(purple, content="RGBColor({ {r: 128, g: 0, b: 128 }})")
 /// ```
-pub fn rgb_blend(color1 : RGBColor, color2 : RGBColor, mix : Double) -> RGBColor {
+pub fn rgb_blend(
+  color1 : RGBColor,
+  color2 : RGBColor,
+  mix : Double,
+) -> RGBColor {
   let mix_clamped = clamp(mix, 0.0, 1.0)
   let r = (color1.r.to_double() * (1.0 - mix_clamped) +
-           color2.r.to_double() * mix_clamped +
-           0.5).to_int()
+  color2.r.to_double() * mix_clamped +
+  0.5).to_int()
   let g = (color1.g.to_double() * (1.0 - mix_clamped) +
-           color2.g.to_double() * mix_clamped +
-           0.5).to_int()
+  color2.g.to_double() * mix_clamped +
+  0.5).to_int()
   let b = (color1.b.to_double() * (1.0 - mix_clamped) +
-           color2.b.to_double() * mix_clamped +
-           0.5).to_int()
+  color2.b.to_double() * mix_clamped +
+  0.5).to_int()
   { r, g, b }
 }
 
@@ -234,8 +380,8 @@ pub fn rgb_blend(color1 : RGBColor, color2 : RGBColor, mix : Double) -> RGBColor
 ///
 /// # Example
 /// ```moonbit
-/// let linear_red = linear_rgb(1.0, 0.0, 0.0)
-/// let clamped = linear_rgb(2.0, -0.5, 0.8)
+/// let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
+/// let _clamped = @colors.linear_rgb(2.0, -0.5, 0.8)
 /// 
 /// inspect(linear_red, content="LinearRGBColor({ {r: 1, g: 0, b: 0 }})")
 /// ```
@@ -252,11 +398,10 @@ pub fn linear_to_rgb(color : LinearRGBColor) -> RGBColor {
   let r_gamma = linear_to_srgb(color.r)
   let g_gamma = linear_to_srgb(color.g)
   let b_gamma = linear_to_srgb(color.b)
-  
   rgb(
     (r_gamma * 255.0 + 0.5).to_int(),
     (g_gamma * 255.0 + 0.5).to_int(),
-    (b_gamma * 255.0 + 0.5).to_int()
+    (b_gamma * 255.0 + 0.5).to_int(),
   )
 }
 
@@ -281,12 +426,16 @@ pub fn linear_to_xyz(color : LinearRGBColor) -> XYZColor {
 ///
 /// # Returns
 /// A new `LinearRGBColor` representing the blended result
-pub fn linear_blend(color1 : LinearRGBColor, color2 : LinearRGBColor, mix : Double) -> LinearRGBColor {
+pub fn linear_blend(
+  color1 : LinearRGBColor,
+  color2 : LinearRGBColor,
+  mix : Double,
+) -> LinearRGBColor {
   let mix_clamped = clamp(mix, 0.0, 1.0)
   linear_rgb(
     color1.r * (1.0 - mix_clamped) + color2.r * mix_clamped,
     color1.g * (1.0 - mix_clamped) + color2.g * mix_clamped,
-    color1.b * (1.0 - mix_clamped) + color2.b * mix_clamped
+    color1.b * (1.0 - mix_clamped) + color2.b * mix_clamped,
   )
 }
 
@@ -327,20 +476,20 @@ pub fn xyz_to_linear(color : XYZColor) -> LinearRGBColor {
 pub fn xyz_to_luv(color : XYZColor) -> LUVColor {
   let u_prime = 4.0 * color.x / (color.x + 15.0 * color.y + 3.0 * color.z)
   let v_prime = 9.0 * color.y / (color.x + 15.0 * color.y + 3.0 * color.z)
-  
-  let u_prime_n = 4.0 * d65_white_x / (d65_white_x + 15.0 * d65_white_y + 3.0 * d65_white_z)
-  let v_prime_n = 9.0 * d65_white_y / (d65_white_x + 15.0 * d65_white_y + 3.0 * d65_white_z)
-  
+  let u_prime_n = 4.0 *
+    d65_white_x /
+    (d65_white_x + 15.0 * d65_white_y + 3.0 * d65_white_z)
+  let v_prime_n = 9.0 *
+    d65_white_y /
+    (d65_white_x + 15.0 * d65_white_y + 3.0 * d65_white_z)
   let y_ratio = color.y / d65_white_y
   let l = if y_ratio > 0.008856 {
     116.0 * y_ratio.pow(1.0 / 3.0) - 16.0
-      } else {
+  } else {
     903.3 * y_ratio
   }
-  
   let u = 13.0 * l * (u_prime - u_prime_n)
   let v = 13.0 * l * (v_prime - v_prime_n)
-  
   luv(l, u, v)
 }
 
@@ -368,21 +517,21 @@ pub fn luv(l : Double, u : Double, v : Double) -> LUVColor {
 /// # Returns
 /// A new `XYZColor` in CIE XYZ color space
 pub fn luv_to_xyz(color : LUVColor) -> XYZColor {
-  let u_prime_n = 4.0 * d65_white_x / (d65_white_x + 15.0 * d65_white_y + 3.0 * d65_white_z)
-  let v_prime_n = 9.0 * d65_white_y / (d65_white_x + 15.0 * d65_white_y + 3.0 * d65_white_z)
-  
+  let u_prime_n = 4.0 *
+    d65_white_x /
+    (d65_white_x + 15.0 * d65_white_y + 3.0 * d65_white_z)
+  let v_prime_n = 9.0 *
+    d65_white_y /
+    (d65_white_x + 15.0 * d65_white_y + 3.0 * d65_white_z)
   let y = if color.l > 8.0 {
     d65_white_y * ((color.l + 16.0) / 116.0).pow(3.0)
   } else {
     d65_white_y * color.l / 903.3
   }
-  
   let u_prime = color.u / (13.0 * color.l) + u_prime_n
   let v_prime = color.v / (13.0 * color.l) + v_prime_n
-  
   let x = y * 9.0 * u_prime / (4.0 * v_prime)
   let z = y * (12.0 - 3.0 * u_prime - 20.0 * v_prime) / (4.0 * v_prime)
-  
   xyz(x, y, z)
 }
 
@@ -392,64 +541,96 @@ pub fn luv_to_xyz(color : LUVColor) -> XYZColor {
 
 ///|
 /// Convert RGB to RGB (identity)
-pub fn rgb_to_rgb(color : RGBColor) -> RGBColor { color }
+pub fn rgb_to_rgb(color : RGBColor) -> RGBColor {
+  color
+}
 
 ///|
 /// Convert LinearRGB to RGB
-pub fn linear_rgb_to_rgb(color : LinearRGBColor) -> RGBColor { linear_to_rgb(color) }
+pub fn linear_rgb_to_rgb(color : LinearRGBColor) -> RGBColor {
+  linear_to_rgb(color)
+}
 
 ///|
 /// Convert XYZ to RGB
-pub fn xyz_to_rgb(color : XYZColor) -> RGBColor { linear_to_rgb(xyz_to_linear(color)) }
+pub fn xyz_to_rgb(color : XYZColor) -> RGBColor {
+  linear_to_rgb(xyz_to_linear(color))
+}
 
 ///|
 /// Convert LUV to RGB
-pub fn luv_to_rgb(color : LUVColor) -> RGBColor { linear_to_rgb(xyz_to_linear(luv_to_xyz(color))) }
+pub fn luv_to_rgb(color : LUVColor) -> RGBColor {
+  linear_to_rgb(xyz_to_linear(luv_to_xyz(color)))
+}
 
 ///|
 /// Convert RGB to LinearRGB
-pub fn rgb_to_linear_rgb(color : RGBColor) -> LinearRGBColor { rgb_to_linear(color) }
+pub fn rgb_to_linear_rgb(color : RGBColor) -> LinearRGBColor {
+  rgb_to_linear(color)
+}
 
 ///|
 /// Convert LinearRGB to LinearRGB (identity)
-pub fn linear_rgb_to_linear_rgb(color : LinearRGBColor) -> LinearRGBColor { color }
+pub fn linear_rgb_to_linear_rgb(color : LinearRGBColor) -> LinearRGBColor {
+  color
+}
 
 ///|
 /// Convert XYZ to LinearRGB
-pub fn xyz_to_linear_rgb(color : XYZColor) -> LinearRGBColor { xyz_to_linear(color) }
+pub fn xyz_to_linear_rgb(color : XYZColor) -> LinearRGBColor {
+  xyz_to_linear(color)
+}
 
 ///|
 /// Convert LUV to LinearRGB
-pub fn luv_to_linear_rgb(color : LUVColor) -> LinearRGBColor { xyz_to_linear(luv_to_xyz(color)) }
+pub fn luv_to_linear_rgb(color : LUVColor) -> LinearRGBColor {
+  xyz_to_linear(luv_to_xyz(color))
+}
 
 ///|
 /// Convert RGB to XYZ
-pub fn rgb_to_xyz(color : RGBColor) -> XYZColor { linear_to_xyz(rgb_to_linear(color)) }
+pub fn rgb_to_xyz(color : RGBColor) -> XYZColor {
+  linear_to_xyz(rgb_to_linear(color))
+}
 
 ///|
 /// Convert LinearRGB to XYZ
-pub fn linear_rgb_to_xyz(color : LinearRGBColor) -> XYZColor { linear_to_xyz(color) }
+pub fn linear_rgb_to_xyz(color : LinearRGBColor) -> XYZColor {
+  linear_to_xyz(color)
+}
 
 ///|
 /// Convert XYZ to XYZ (identity)
-pub fn xyz_to_xyz(color : XYZColor) -> XYZColor { color }
+pub fn xyz_to_xyz(color : XYZColor) -> XYZColor {
+  color
+}
 
 ///|
 /// Convert LUV to XYZ
-pub fn luv_to_xyz_color(color : LUVColor) -> XYZColor { luv_to_xyz(color) }
+pub fn luv_to_xyz_color(color : LUVColor) -> XYZColor {
+  luv_to_xyz(color)
+}
 
 ///|
 /// Convert RGB to LUV
-pub fn rgb_to_luv(color : RGBColor) -> LUVColor { xyz_to_luv(linear_to_xyz(rgb_to_linear(color))) }
+pub fn rgb_to_luv(color : RGBColor) -> LUVColor {
+  xyz_to_luv(linear_to_xyz(rgb_to_linear(color)))
+}
 
 ///|
 /// Convert LinearRGB to LUV
-pub fn linear_rgb_to_luv(color : LinearRGBColor) -> LUVColor { xyz_to_luv(linear_to_xyz(color)) }
+pub fn linear_rgb_to_luv(color : LinearRGBColor) -> LUVColor {
+  xyz_to_luv(linear_to_xyz(color))
+}
 
 ///|
 /// Convert XYZ to LUV
-pub fn xyz_to_luv_color(color : XYZColor) -> LUVColor { xyz_to_luv(color) }
+pub fn xyz_to_luv_color(color : XYZColor) -> LUVColor {
+  xyz_to_luv(color)
+}
 
 ///|
 /// Convert LUV to LUV (identity)
-pub fn luv_to_luv(color : LUVColor) -> LUVColor { color }
+pub fn luv_to_luv(color : LUVColor) -> LUVColor {
+  color
+}

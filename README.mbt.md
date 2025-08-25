@@ -252,6 +252,39 @@ The library provides comprehensive conversion functions between all color spaces
 
 These functions enable seamless conversion between any color spaces while maintaining type safety.
 
+### Trait-Based API
+
+The library also provides a clean trait-based API that reduces the API surface and makes conversions more intuitive:
+
+```moonbit
+test "trait-based conversions" {
+  let rgb_color = @colors.rgb(255, 128, 64)
+  let xyz_color = @colors.xyz(50.0, 60.0, 70.0)
+  let luv_color = @colors.luv(75.0, 25.0, -15.0)
+  
+  // All types can convert to any other type using the same method names
+  let _rgb_from_rgb = rgb_color.to_rgb()      // Identity conversion
+  let _rgb_from_xyz = xyz_color.to_rgb()      // XYZ -> RGB
+  let _rgb_from_luv = luv_color.to_rgb()      // LUV -> RGB
+  
+  let _linear_from_rgb = rgb_color.to_linear_rgb()
+  let _xyz_from_rgb = rgb_color.to_xyz()
+  let _luv_from_rgb = rgb_color.to_luv()
+  
+  // Blending works with trait methods too
+  let red = @colors.rgb(255, 0, 0)
+  let blue = @colors.rgb(0, 0, 255)
+  let _purple = red.blend(blue, 0.5)
+}
+```
+
+**Available Traits:**
+- `ToRGB` - Convert any color to RGB
+- `ToLinearRGB` - Convert any color to Linear RGB
+- `ToXYZ` - Convert any color to XYZ
+- `ToLUV` - Convert any color to LUV
+- `Blend` - Blend two colors of the same type
+
 ## Installation
 
 Add this library to your MoonBit project:
