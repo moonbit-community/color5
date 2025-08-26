@@ -16,6 +16,7 @@
 /// 
 /// inspect(red, content="RGBColor({ {r: 255, g: 0, b: 0 }})")
 /// ```
+#valtype
 pub struct RGBColor {
   r : Int
   g : Int
@@ -159,6 +160,7 @@ pub impl ToLUV for LUVColor with to_luv(self) {
 /// 
 /// inspect(linear_red, content="LinearRGBColor({ {r: 1, g: 0, b: 0 }})")
 /// ```
+#valtype
 pub struct LinearRGBColor {
   r : Double
   g : Double
@@ -175,6 +177,7 @@ pub struct LinearRGBColor {
 /// 
 /// inspect(xyz_white, content="XYZColor({ {x: 95.047, y: 100, z: 108.883 }})")
 /// ```
+#valtype
 pub struct XYZColor {
   x : Double
   y : Double
@@ -191,6 +194,7 @@ pub struct XYZColor {
 /// 
 /// inspect(luv_white, content="LUVColor({ {l: 100, u: 0, v: 0 }})")
 /// ```
+#valtype
 pub struct LUVColor {
   l : Double
   u : Double
