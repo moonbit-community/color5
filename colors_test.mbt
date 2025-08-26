@@ -219,6 +219,44 @@ test "linear rgb blending" {
 }
 
 ///|
+test "xyz color blending" {
+  let xyz_white = @colors.xyz(95.047, 100.0, 108.883)
+  let xyz_black = @colors.xyz(0.0, 0.0, 0.0)
+
+  let xyz_gray = xyz_white.blend(xyz_black, 0.5)
+  inspect(xyz_gray, content="XYZColor({ {x: 47.5235, y: 50, z: 54.4415 }})")
+
+  let mostly_white = xyz_white.blend(xyz_black, 0.25)
+  inspect(mostly_white, content="XYZColor({ {x: 71.28525, y: 75, z: 81.66225 }})")
+
+  // Test edge cases
+  let all_white = xyz_white.blend(xyz_black, 0.0)
+  inspect(all_white, content="XYZColor({ {x: 95.047, y: 100, z: 108.883 }})")
+
+  let all_black = xyz_white.blend(xyz_black, 1.0)
+  inspect(all_black, content="XYZColor({ {x: 0, y: 0, z: 0 }})")
+}
+
+///|
+test "luv color blending" {
+  let luv_white = @colors.luv(100.0, 0.0, 0.0)
+  let luv_black = @colors.luv(0.0, 0.0, 0.0)
+
+  let luv_gray = luv_white.blend(luv_black, 0.5)
+  inspect(luv_gray, content="LUVColor({ {l: 50, u: 0, v: 0 }})")
+
+  let mostly_white = luv_white.blend(luv_black, 0.25)
+  inspect(mostly_white, content="LUVColor({ {l: 75, u: 0, v: 0 }})")
+
+  // Test with colored LUV values
+  let luv_red = @colors.luv(53.24, 175.05, 37.75)
+  let luv_blue = @colors.luv(32.30, -9.40, -130.34)
+
+  let luv_purple = luv_red.blend(luv_blue, 0.5)
+  inspect(luv_purple, content="LUVColor({ {l: 42.77, u: 82.825, v: -46.295 }})")
+}
+
+///|
 test "trait-based rgb conversion" {
   let rgb_color = @colors.rgb(255, 128, 64)
   let linear_color = @colors.linear_rgb(0.8, 0.6, 0.4)

@@ -18,6 +18,7 @@ pub struct LUVColor {
   u : Double
   v : Double
 }
+impl Blend for LUVColor
 impl ToLUV for LUVColor
 impl ToLinearRGB for LUVColor
 impl ToRGB for LUVColor
@@ -53,6 +54,7 @@ pub struct XYZColor {
   y : Double
   z : Double
 }
+impl Blend for XYZColor
 impl ToLUV for XYZColor
 impl ToLinearRGB for XYZColor
 impl ToRGB for XYZColor

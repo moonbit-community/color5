@@ -104,6 +104,11 @@ pub impl Blend for LinearRGBColor with blend(self, other, mix) {
   linear_blend(self, other, mix)
 }
 
+///|
+pub impl Blend for XYZColor with blend(self, other, mix) {
+  xyz_blend(self, other, mix)
+}
+
 // Trait implementations for XYZColor
 
 ///|
@@ -146,6 +151,11 @@ pub impl ToXYZ for LUVColor with to_xyz(self) {
 ///|
 pub impl ToLUV for LUVColor with to_luv(self) {
   self
+}
+
+///|
+pub impl Blend for LUVColor with blend(self, other, mix) {
+  luv_blend(self, other, mix)
 }
 
 ///|
@@ -439,6 +449,72 @@ fn linear_blend(
     color1.r * (1.0 - mix_clamped) + color2.r * mix_clamped,
     color1.g * (1.0 - mix_clamped) + color2.g * mix_clamped,
     color1.b * (1.0 - mix_clamped) + color2.b * mix_clamped,
+  )
+}
+
+///|
+/// Blend two XYZ colors using linear interpolation.
+/// 
+/// # Parameters
+/// - `color1`: The first XYZ color to blend
+/// - `color2`: The second XYZ color to blend with
+/// - `mix`: Mixing ratio (0.0 = 100% color1, 1.0 = 100% color2)
+///
+/// # Returns
+/// A new `XYZColor` representing the blended result
+///
+/// # Example
+/// ```moonbit
+/// let white = @colors.xyz(95.047, 100.0, 108.883)
+/// let black = @colors.xyz(0.0, 0.0, 0.0)
+/// let gray = white.blend(black, 0.5)
+/// // Or using function: let gray = @colors.xyz_blend(white, black, 0.5)
+/// 
+/// inspect(gray, content="XYZColor({ {x: 47.5235, y: 50, z: 54.4415 }})")
+/// ```
+fn xyz_blend(
+  color1 : XYZColor,
+  color2 : XYZColor,
+  mix : Double,
+) -> XYZColor {
+  let mix_clamped = clamp(mix, 0.0, 1.0)
+  xyz(
+    color1.x * (1.0 - mix_clamped) + color2.x * mix_clamped,
+    color1.y * (1.0 - mix_clamped) + color2.y * mix_clamped,
+    color1.z * (1.0 - mix_clamped) + color2.z * mix_clamped,
+  )
+}
+
+///|
+/// Blend two LUV colors using linear interpolation.
+/// 
+/// # Parameters
+/// - `color1`: The first LUV color to blend
+/// - `color2`: The second LUV color to blend with
+/// - `mix`: Mixing ratio (0.0 = 100% color1, 1.0 = 100% color2)
+///
+/// # Returns
+/// A new `LUVColor` representing the blended result
+///
+/// # Example
+/// ```moonbit
+/// let white = @colors.luv(100.0, 0.0, 0.0)
+/// let black = @colors.luv(0.0, 0.0, 0.0)
+/// let gray = white.blend(black, 0.5)
+/// // Or using function: let gray = @colors.luv_blend(white, black, 0.5)
+/// 
+/// inspect(gray, content="LUVColor({ {l: 50, u: 0, v: 0 }})")
+/// ```
+fn luv_blend(
+  color1 : LUVColor,
+  color2 : LUVColor,
+  mix : Double,
+) -> LUVColor {
+  let mix_clamped = clamp(mix, 0.0, 1.0)
+  luv(
+    color1.l * (1.0 - mix_clamped) + color2.l * mix_clamped,
+    color1.u * (1.0 - mix_clamped) + color2.u * mix_clamped,
+    color1.v * (1.0 - mix_clamped) + color2.v * mix_clamped,
   )
 }
 
