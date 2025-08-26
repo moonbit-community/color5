@@ -1,5 +1,6 @@
 ///|
 /// Main demo program for the colors library using separate types per color space
+#coverage.skip
 fn main {
   println("Colors Library Demo - Type-Safe Color Spaces")
   println("============================================")
