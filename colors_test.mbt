@@ -62,7 +62,7 @@ test "luv color creation" {
 ///|
 test "rgb to linear conversion" {
   let rgb_red = @colors.rgb(255, 0, 0)
-  let linear_red = @colors.rgb_to_linear(rgb_red)
+  let linear_red = rgb_red.to_linear_rgb()
 
   // Check that conversion produces reasonable values
   match linear_red {
@@ -78,7 +78,7 @@ test "rgb to linear conversion" {
 
   // Test gamma correction - middle gray should not be 0.5 in linear space
   let rgb_mid = @colors.rgb(128, 128, 128)
-  let linear_mid = @colors.rgb_to_linear(rgb_mid)
+  let linear_mid = rgb_mid.to_linear_rgb()
   match linear_mid {
     { r, g: _, b: _ } => {
       // Due to gamma correction, 128/255 ≈ 0.5 in sRGB should be ~0.22 in linear
@@ -91,13 +91,13 @@ test "rgb to linear conversion" {
 ///|
 test "linear to rgb conversion" {
   let linear = @colors.linear_rgb(1.0, 0.0, 0.0)
-  let rgb_color = @colors.linear_to_rgb(linear)
+  let rgb_color = linear.to_rgb()
   inspect(rgb_color, content="RGBColor({ {r: 255, g: 0, b: 0 }})")
 
   // Test round-trip conversion
   let original_rgb = @colors.rgb(200, 150, 100)
-  let to_linear = @colors.rgb_to_linear(original_rgb)
-  let back_to_rgb = @colors.linear_to_rgb(to_linear)
+  let to_linear = original_rgb.to_linear_rgb()
+  let back_to_rgb = to_linear.to_rgb()
 
   // Should be very close to original (within rounding error)
   match (original_rgb, back_to_rgb) {
@@ -115,7 +115,7 @@ test "linear to rgb conversion" {
 ///|
 test "linear to xyz conversion" {
   let linear_white = @colors.linear_rgb(1.0, 1.0, 1.0)
-  let xyz_white = @colors.linear_to_xyz(linear_white)
+  let xyz_white = linear_white.to_xyz()
 
   // Should be close to D65 white point
   match xyz_white {
@@ -133,7 +133,7 @@ test "linear to xyz conversion" {
 ///|
 test "xyz to linear conversion" {
   let xyz_white = @colors.xyz(95.047, 100.0, 108.883)
-  let linear_white = @colors.xyz_to_linear(xyz_white)
+  let linear_white = xyz_white.to_linear_rgb()
 
   // Should be close to (1, 1, 1)
   match linear_white {
@@ -151,7 +151,7 @@ test "xyz to linear conversion" {
 ///|
 test "xyz to luv conversion" {
   let xyz_white = @colors.xyz(95.047, 100.0, 108.883)
-  let luv_white = @colors.xyz_to_luv(xyz_white)
+  let luv_white = xyz_white.to_luv()
 
   // White point should have L*=100, u*≈0, v*≈0
   match luv_white {
@@ -169,7 +169,7 @@ test "xyz to luv conversion" {
 ///|
 test "luv to xyz conversion" {
   let luv_white = @colors.luv(100.0, 0.0, 0.0)
-  let xyz_white = @colors.luv_to_xyz(luv_white)
+  let xyz_white = luv_white.to_xyz()
 
   // Should be close to D65 white point
   match xyz_white {
@@ -188,22 +188,22 @@ test "luv to xyz conversion" {
 test "rgb blending" {
   let red = @colors.rgb(255, 0, 0)
   let blue = @colors.rgb(0, 0, 255)
-  let purple = @colors.rgb_blend(red, blue, 0.5)
+  let purple = red.blend(blue, 0.5)
   inspect(purple, content="RGBColor({ {r: 128, g: 0, b: 128 }})")
-  let mostly_red = @colors.rgb_blend(red, blue, 0.25)
+  let mostly_red = red.blend(blue, 0.25)
   inspect(mostly_red, content="RGBColor({ {r: 192, g: 0, b: 64 }})")
-  let mostly_blue = @colors.rgb_blend(red, blue, 0.75)
+  let mostly_blue = red.blend(blue, 0.75)
   inspect(mostly_blue, content="RGBColor({ {r: 64, g: 0, b: 192 }})")
 
   // Test edge cases
-  let all_red = @colors.rgb_blend(red, blue, 0.0)
-  let all_blue = @colors.rgb_blend(red, blue, 1.0)
+  let all_red = red.blend(blue, 0.0)
+  let all_blue = red.blend(blue, 1.0)
   inspect(all_red, content="RGBColor({ {r: 255, g: 0, b: 0 }})")
   inspect(all_blue, content="RGBColor({ {r: 0, g: 0, b: 255 }})")
 
   // Test clamping of mix parameter
-  let clamped_low = @colors.rgb_blend(red, blue, -0.5)
-  let clamped_high = @colors.rgb_blend(red, blue, 1.5)
+  let clamped_low = red.blend(blue, -0.5)
+  let clamped_high = red.blend(blue, 1.5)
   inspect(clamped_low, content="RGBColor({ {r: 255, g: 0, b: 0 }})")
   inspect(clamped_high, content="RGBColor({ {r: 0, g: 0, b: 255 }})")
 }
@@ -212,9 +212,9 @@ test "rgb blending" {
 test "linear rgb blending" {
   let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
   let linear_blue = @colors.linear_rgb(0.0, 0.0, 1.0)
-  let linear_purple = @colors.linear_blend(linear_red, linear_blue, 0.5)
+  let linear_purple = linear_red.blend(linear_blue, 0.5)
   inspect(linear_purple, content="LinearRGBColor({ {r: 0.5, g: 0, b: 0.5 }})")
-  let mostly_red = @colors.linear_blend(linear_red, linear_blue, 0.25)
+  let mostly_red = linear_red.blend(linear_blue, 0.25)
   inspect(mostly_red, content="LinearRGBColor({ {r: 0.75, g: 0, b: 0.25 }})")
 }
 
@@ -334,14 +334,14 @@ test "trait-based luv conversion" {
 test "chained conversions" {
   let original_rgb = @colors.rgb(200, 150, 100)
 
-  // Chain through all color spaces and back
+  // Chain through all color spaces and back using trait methods
   let final_rgb = original_rgb
-    |> @colors.rgb_to_linear
-    |> @colors.linear_to_xyz
-    |> @colors.xyz_to_luv
-    |> @colors.luv_to_xyz
-    |> @colors.xyz_to_linear
-    |> @colors.linear_to_rgb
+    .to_linear_rgb()
+    .to_xyz()
+    .to_luv()
+    .to_xyz()
+    .to_linear_rgb()
+    .to_rgb()
 
   // Should be close to original (within rounding error)
   match (original_rgb, final_rgb) {
@@ -360,18 +360,18 @@ test "chained conversions" {
 test "edge cases" {
   // Test black color through all conversions
   let black_rgb = @colors.rgb(0, 0, 0)
-  let black_linear = @colors.rgb_to_linear(black_rgb)
-  let black_xyz = @colors.linear_to_xyz(black_linear)
-  let black_luv = @colors.xyz_to_luv(black_xyz)
+  let black_linear = black_rgb.to_linear_rgb()
+  let black_xyz = black_linear.to_xyz()
+  let black_luv = black_xyz.to_luv()
   inspect(black_linear, content="LinearRGBColor({ {r: 0, g: 0, b: 0 }})")
   inspect(black_xyz, content="XYZColor({ {x: 0, y: 0, z: 0 }})")
   inspect(black_luv, content="LUVColor({ {l: 0, u: 0, v: 0 }})")
 
   // Test white color through all conversions
   let white_rgb = @colors.rgb(255, 255, 255)
-  let white_linear = @colors.rgb_to_linear(white_rgb)
-  let white_xyz = @colors.linear_to_xyz(white_linear)
-  let white_luv = @colors.xyz_to_luv(white_xyz)
+  let white_linear = white_rgb.to_linear_rgb()
+  let white_xyz = white_linear.to_xyz()
+  let white_luv = white_xyz.to_luv()
 
   // White should have L* close to 100
   match white_luv {

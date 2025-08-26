@@ -23,21 +23,21 @@ test "quick start example" {
   let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
 
   // Convert between color spaces (compile-time checked)
-  let xyz_red = @colors.linear_to_xyz(@colors.rgb_to_linear(red))
-  let luv_red = @colors.xyz_to_luv(xyz_red)
+  let xyz_red = red.to_linear_rgb().to_xyz()
+  let luv_red = xyz_red.to_luv()
 
   // Chain conversions with full type safety
   let final_color = red
-    |> @colors.rgb_to_linear
-    |> @colors.linear_to_xyz
-    |> @colors.xyz_to_luv
-    |> @colors.luv_to_xyz
-    |> @colors.xyz_to_linear
-    |> @colors.linear_to_rgb
+    .to_linear_rgb()
+    .to_xyz()
+    .to_luv()
+    .to_xyz()
+    .to_linear_rgb()
+    .to_rgb()
 
   // Blend colors
   let blue = @colors.rgb(0, 0, 255)
-  let purple = @colors.rgb_blend(red, blue, 0.5)
+  let purple = red.blend(blue, 0.5)
   
   // Verify the results
   inspect(red, content="RGBColor({ {r: 255, g: 0, b: 0 }})")
@@ -85,14 +85,14 @@ test "color space conversions" {
   let rgb_color = @colors.rgb(255, 128, 64)
   
   // Direct conversions (compile-time type checked)
-  let linear_color = @colors.rgb_to_linear(rgb_color)
-  let xyz_color = @colors.linear_to_xyz(linear_color)
-  let luv_color = @colors.xyz_to_luv(xyz_color)
+  let linear_color = rgb_color.to_linear_rgb()
+  let xyz_color = linear_color.to_xyz()
+  let luv_color = xyz_color.to_luv()
   
   // Reverse conversions
-  let back_to_xyz = @colors.luv_to_xyz(luv_color)
-  let back_to_linear = @colors.xyz_to_linear(back_to_xyz)
-  let back_to_rgb = @colors.linear_to_rgb(back_to_linear)
+  let back_to_xyz = luv_color.to_xyz()
+  let back_to_linear = back_to_xyz.to_linear_rgb()
+  let back_to_rgb = back_to_linear.to_rgb()
   
   // Should be very close to original
   match (rgb_color, back_to_rgb) {
@@ -137,8 +137,8 @@ test "color blending" {
   let blue = @colors.rgb(0, 0, 255)
   
   // RGB blending
-  let purple = @colors.rgb_blend(red, blue, 0.5)
-  let mostly_red = @colors.rgb_blend(red, blue, 0.25)
+  let purple = red.blend(blue, 0.5)
+  let mostly_red = red.blend(blue, 0.25)
   
   inspect(purple, content="RGBColor({ {r: 128, g: 0, b: 128 }})")
   inspect(mostly_red, content="RGBColor({ {r: 192, g: 0, b: 64 }})")
@@ -146,7 +146,7 @@ test "color blending" {
   // Linear blending (more accurate for lighting)
   let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
   let linear_blue = @colors.linear_rgb(0.0, 0.0, 1.0)
-  let linear_purple = @colors.linear_blend(linear_red, linear_blue, 0.5)
+  let linear_purple = linear_red.blend(linear_blue, 0.5)
   
   inspect(linear_purple, content="LinearRGBColor({ {r: 0.5, g: 0, b: 0.5 }})")
 }
@@ -156,7 +156,7 @@ test "color blending" {
 test "gamma correction demonstration" {
   // Demonstrate the difference between RGB and LinearRGB
   let rgb_mid = @colors.rgb(128, 128, 128)  // 50% in RGB space
-  let linear_mid = @colors.rgb_to_linear(rgb_mid)
+  let linear_mid = rgb_mid.to_linear_rgb()
   
   // The linear value will be around 0.22, not 0.5!
   match linear_mid {
@@ -168,7 +168,7 @@ test "gamma correction demonstration" {
   }
   
   // Convert back to verify round-trip accuracy
-  let back_to_rgb = @colors.linear_to_rgb(linear_mid)
+  let back_to_rgb = linear_mid.to_rgb()
   inspect(back_to_rgb, content="RGBColor({ {r: 128, g: 128, b: 128 }})")
 }
 
@@ -181,9 +181,9 @@ test "standard colors" {
   let blue = @colors.rgb(0, 0, 255)
   
   // Secondary colors through blending
-  let cyan = @colors.rgb_blend(green, blue, 0.5)
-  let magenta = @colors.rgb_blend(red, blue, 0.5)
-  let yellow = @colors.rgb_blend(red, green, 0.5)
+  let cyan = green.blend(blue, 0.5)
+  let magenta = red.blend(blue, 0.5)
+  let yellow = red.blend(green, 0.5)
   
   inspect(cyan, content="RGBColor({ {r: 0, g: 128, b: 128 }})")
   inspect(magenta, content="RGBColor({ {r: 128, g: 0, b: 128 }})")
@@ -207,12 +207,12 @@ test "chained color operations" {
   
   // Chain multiple conversions using pipe operator
   let processed_color = original_color
-    |> @colors.rgb_to_linear      // Convert to linear space
-    |> @colors.linear_to_xyz      // Convert to XYZ
-    |> @colors.xyz_to_luv         // Convert to LUV for processing
-    |> @colors.luv_to_xyz         // Convert back to XYZ
-    |> @colors.xyz_to_linear      // Convert back to linear
-    |> @colors.linear_to_rgb      // Convert back to RGB
+    .to_linear_rgb()      // Convert to linear space
+    .to_xyz()             // Convert to XYZ
+    .to_luv()             // Convert to LUV for processing
+    .to_xyz()             // Convert back to XYZ
+    .to_linear_rgb()      // Convert back to linear
+    .to_rgb()             // Convert back to RGB
   
   // Should be very close to original (within rounding error)
   match (original_color, processed_color) {

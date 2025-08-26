@@ -2,29 +2,13 @@
 package "bobzhang/colors"
 
 // Values
-fn linear_blend(LinearRGBColor, LinearRGBColor, Double) -> LinearRGBColor
-
 fn linear_rgb(Double, Double, Double) -> LinearRGBColor
-
-fn linear_to_rgb(LinearRGBColor) -> RGBColor
-
-fn linear_to_xyz(LinearRGBColor) -> XYZColor
 
 fn luv(Double, Double, Double) -> LUVColor
 
-fn luv_to_xyz(LUVColor) -> XYZColor
-
 fn rgb(Int, Int, Int) -> RGBColor
 
-fn rgb_blend(RGBColor, RGBColor, Double) -> RGBColor
-
-fn rgb_to_linear(RGBColor) -> LinearRGBColor
-
 fn xyz(Double, Double, Double) -> XYZColor
-
-fn xyz_to_linear(XYZColor) -> LinearRGBColor
-
-fn xyz_to_luv(XYZColor) -> LUVColor
 
 // Errors
 

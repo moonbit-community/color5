@@ -310,12 +310,12 @@ pub fn rgb(r : Int, g : Int, b : Int) -> RGBColor {
 /// # Example
 /// ```moonbit
 /// let rgb_gray = @colors.rgb(128, 128, 128)
-/// let _linear_gray = @colors.rgb_to_linear(rgb_gray)
+/// let _linear_gray = rgb_gray.to_linear_rgb()
 /// // RGB(128, 128, 128) becomes approximately LinearRGB(0.22, 0.22, 0.22)
 /// 
 /// inspect(rgb_gray, content="RGBColor({ {r: 128, g: 128, b: 128 }})")
 /// ```
-pub fn rgb_to_linear(color : RGBColor) -> LinearRGBColor {
+fn rgb_to_linear(color : RGBColor) -> LinearRGBColor {
   let r_norm = color.r.to_double() / 255.0
   let g_norm = color.g.to_double() / 255.0
   let b_norm = color.b.to_double() / 255.0
@@ -342,12 +342,12 @@ pub fn rgb_to_linear(color : RGBColor) -> LinearRGBColor {
 /// ```moonbit
 /// let red = @colors.rgb(255, 0, 0)
 /// let blue = @colors.rgb(0, 0, 255)
-/// let purple = @colors.rgb_blend(red, blue, 0.5)
-/// // Or using trait method: let purple = red.blend(blue, 0.5)
+/// let purple = red.blend(blue, 0.5)
+/// // Or using function: let purple = @colors.rgb_blend(red, blue, 0.5)
 /// 
 /// inspect(purple, content="RGBColor({ {r: 128, g: 0, b: 128 }})")
 /// ```
-pub fn rgb_blend(
+fn rgb_blend(
   color1 : RGBColor,
   color2 : RGBColor,
   mix : Double,
@@ -396,7 +396,7 @@ pub fn linear_rgb(r : Double, g : Double, b : Double) -> LinearRGBColor {
 ///
 /// # Returns
 /// A new `RGBColor` with gamma encoding applied
-pub fn linear_to_rgb(color : LinearRGBColor) -> RGBColor {
+fn linear_to_rgb(color : LinearRGBColor) -> RGBColor {
   let r_gamma = linear_to_srgb(color.r)
   let g_gamma = linear_to_srgb(color.g)
   let b_gamma = linear_to_srgb(color.b)
@@ -412,7 +412,7 @@ pub fn linear_to_rgb(color : LinearRGBColor) -> RGBColor {
 ///
 /// # Returns
 /// A new `XYZColor` in CIE XYZ color space
-pub fn linear_to_xyz(color : LinearRGBColor) -> XYZColor {
+fn linear_to_xyz(color : LinearRGBColor) -> XYZColor {
   let (x, y, z) = apply_matrix(srgb_to_xyz_matrix, color.r, color.g, color.b)
   xyz(x, y, z)
 }
@@ -429,7 +429,7 @@ pub fn linear_to_xyz(color : LinearRGBColor) -> XYZColor {
 ///
 /// # Returns
 /// A new `LinearRGBColor` representing the blended result
-pub fn linear_blend(
+fn linear_blend(
   color1 : LinearRGBColor,
   color2 : LinearRGBColor,
   mix : Double,
@@ -466,7 +466,7 @@ pub fn xyz(x : Double, y : Double, z : Double) -> XYZColor {
 ///
 /// # Returns
 /// A new `LinearRGBColor` with clamped values
-pub fn xyz_to_linear(color : XYZColor) -> LinearRGBColor {
+fn xyz_to_linear(color : XYZColor) -> LinearRGBColor {
   let (r, g, b) = apply_matrix(xyz_to_srgb_matrix, color.x, color.y, color.z)
   linear_rgb(r, g, b)
 }
@@ -476,7 +476,7 @@ pub fn xyz_to_linear(color : XYZColor) -> LinearRGBColor {
 ///
 /// # Returns
 /// A new `LUVColor` in CIE LUV color space
-pub fn xyz_to_luv(color : XYZColor) -> LUVColor {
+fn xyz_to_luv(color : XYZColor) -> LUVColor {
   let u_prime = 4.0 * color.x / (color.x + 15.0 * color.y + 3.0 * color.z)
   let v_prime = 9.0 * color.y / (color.x + 15.0 * color.y + 3.0 * color.z)
   let u_prime_n = 4.0 *
@@ -519,7 +519,7 @@ pub fn luv(l : Double, u : Double, v : Double) -> LUVColor {
 ///
 /// # Returns
 /// A new `XYZColor` in CIE XYZ color space
-pub fn luv_to_xyz(color : LUVColor) -> XYZColor {
+fn luv_to_xyz(color : LUVColor) -> XYZColor {
   let u_prime_n = 4.0 *
     d65_white_x /
     (d65_white_x + 15.0 * d65_white_y + 3.0 * d65_white_z)

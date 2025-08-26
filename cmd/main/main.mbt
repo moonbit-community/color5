@@ -21,14 +21,13 @@ fn main {
 
   // Blend colors
   println("\n2. Blending colors:")
-  let purple = @colors.rgb_blend(red, blue, 0.5)
-  let yellow = @colors.rgb_blend(red, green, 0.5)
+  let purple = red.blend(blue, 0.5)
+  let yellow = red.blend(green, 0.5)
   println("Red + Blue (50/50): " + purple.to_string())
   println("Red + Green (50/50): " + yellow.to_string())
 
   // Linear blending (more accurate)
-  let linear_purple = @colors.linear_blend(
-    linear_red,
+  let linear_purple = linear_red.blend(
     @colors.linear_rgb(0.0, 0.0, 1.0),
     0.5,
   )
@@ -36,9 +35,9 @@ fn main {
 
   // Convert between color spaces
   println("\n3. Color space conversions:")
-  let red_linear = @colors.rgb_to_linear(red)
-  let red_xyz = @colors.linear_to_xyz(red_linear)
-  let red_luv = @colors.xyz_to_luv(red_xyz)
+  let red_linear = red.to_linear_rgb()
+  let red_xyz = red_linear.to_xyz()
+  let red_luv = red_xyz.to_luv()
   println("Red RGB: " + red.to_string())
   println("Red Linear: " + red_linear.to_string())
   println("Red XYZ: " + red_xyz.to_string())
@@ -58,19 +57,19 @@ fn main {
   // Demonstrate type safety - these are all compile-time checked!
   println("\n5. Type-safe chained conversions:")
   let final_color = red
-    |> @colors.rgb_to_linear // RGB -> LinearRGB
-    |> @colors.linear_to_xyz // LinearRGB -> XYZ
-    |> @colors.xyz_to_luv // XYZ -> LUV
-    |> @colors.luv_to_xyz // LUV -> XYZ
-    |> @colors.xyz_to_linear // XYZ -> LinearRGB
-    |> @colors.linear_to_rgb // LinearRGB -> RGB
+    .to_linear_rgb() // RGB -> LinearRGB
+    .to_xyz() // LinearRGB -> XYZ
+    .to_luv() // XYZ -> LUV
+    .to_xyz() // LUV -> XYZ
+    .to_linear_rgb() // XYZ -> LinearRGB
+    .to_rgb() // LinearRGB -> RGB
   println("Original: " + red.to_string())
   println("After round-trip: " + final_color.to_string())
 
   // Demonstrate gamma correction
   println("\n6. Gamma correction demonstration:")
   let rgb_mid = @colors.rgb(128, 128, 128) // 50% in sRGB
-  let linear_mid = @colors.rgb_to_linear(rgb_mid)
+  let linear_mid = rgb_mid.to_linear_rgb()
   println("RGB middle gray: " + rgb_mid.to_string())
   println("Linear equivalent: " + linear_mid.to_string())
   match linear_mid {
@@ -86,15 +85,15 @@ fn main {
   println("\n7. Standard colors:")
   let white = @colors.rgb(255, 255, 255)
   let black = @colors.rgb(0, 0, 0)
-  let gray = @colors.rgb_blend(white, black, 0.5)
+  let gray = white.blend(black, 0.5)
   println("White: " + white.to_string())
   println("Black: " + black.to_string())
   println("50% Gray: " + gray.to_string())
 
   // Convert white to all color spaces
-  let white_linear = @colors.rgb_to_linear(white)
-  let white_xyz = @colors.linear_to_xyz(white_linear)
-  let white_luv = @colors.xyz_to_luv(white_xyz)
+  let white_linear = white.to_linear_rgb()
+  let white_xyz = white_linear.to_xyz()
+  let white_luv = white_xyz.to_luv()
   println("White in Linear: " + white_linear.to_string())
   println("White in XYZ: " + white_xyz.to_string())
   println("White in LUV: " + white_luv.to_string())
