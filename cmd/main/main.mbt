@@ -80,10 +80,10 @@ fn main {
   println("RGB middle gray: " + rgb_mid.to_string())
   println("Linear equivalent: " + linear_mid.to_string())
   match linear_mid {
-    { r, g: _, b: _ } =>
+    { lr, lg: _, lb: _ } =>
       println(
         "Linear value is ~" +
-        r.to_string() +
+        lr.to_string() +
         ", not 0.5 due to gamma correction!",
       )
   }

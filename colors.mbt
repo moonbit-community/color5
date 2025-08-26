@@ -168,13 +168,13 @@ pub impl Blend for LUVColor with blend(self, other, mix) {
 /// let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
 /// let _clamped = @colors.linear_rgb(2.0, -0.5, 0.8)  // becomes LinearRGBColor(1.0, 0.0, 0.8)
 /// 
-/// inspect(linear_red, content="{r: 1, g: 0, b: 0}")
+/// inspect(linear_red, content="{lr: 1, lg: 0, lb: 0}")
 /// ```
 #valtype
 pub struct LinearRGBColor {
-  r : Double
-  g : Double
-  b : Double
+  lr : Double
+  lg : Double
+  lb : Double
 } derive(Show)
 
 ///|
@@ -395,10 +395,10 @@ fn rgb_blend(color1 : RGBColor, color2 : RGBColor, mix : Double) -> RGBColor {
 /// let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
 /// let _clamped = @colors.linear_rgb(2.0, -0.5, 0.8)
 /// 
-/// inspect(linear_red, content="{r: 1, g: 0, b: 0}")
+/// inspect(linear_red, content="{lr: 1, lg: 0, lb: 0}")
 /// ```
 pub fn linear_rgb(r : Double, g : Double, b : Double) -> LinearRGBColor {
-  { r: clamp(r, 0.0, 1.0), g: clamp(g, 0.0, 1.0), b: clamp(b, 0.0, 1.0) }
+  { lr: clamp(r, 0.0, 1.0), lg: clamp(g, 0.0, 1.0), lb: clamp(b, 0.0, 1.0) }
 }
 
 ///|
@@ -407,9 +407,9 @@ pub fn linear_rgb(r : Double, g : Double, b : Double) -> LinearRGBColor {
 /// # Returns
 /// A new `RGBColor` with gamma encoding applied
 fn linear_to_rgb(color : LinearRGBColor) -> RGBColor {
-  let r_gamma = linear_to_srgb(color.r)
-  let g_gamma = linear_to_srgb(color.g)
-  let b_gamma = linear_to_srgb(color.b)
+  let r_gamma = linear_to_srgb(color.lr)
+  let g_gamma = linear_to_srgb(color.lg)
+  let b_gamma = linear_to_srgb(color.lb)
   rgb(
     (r_gamma * 255.0 + 0.5).to_int(),
     (g_gamma * 255.0 + 0.5).to_int(),
@@ -423,7 +423,7 @@ fn linear_to_rgb(color : LinearRGBColor) -> RGBColor {
 /// # Returns
 /// A new `XYZColor` in CIE XYZ color space
 fn linear_to_xyz(color : LinearRGBColor) -> XYZColor {
-  let (x, y, z) = apply_matrix(srgb_to_xyz_matrix, color.r, color.g, color.b)
+  let (x, y, z) = apply_matrix(srgb_to_xyz_matrix, color.lr, color.lg, color.lb)
   xyz(x, y, z)
 }
 
@@ -446,9 +446,9 @@ fn linear_blend(
 ) -> LinearRGBColor {
   let mix_clamped = clamp(mix, 0.0, 1.0)
   linear_rgb(
-    color1.r * (1.0 - mix_clamped) + color2.r * mix_clamped,
-    color1.g * (1.0 - mix_clamped) + color2.g * mix_clamped,
-    color1.b * (1.0 - mix_clamped) + color2.b * mix_clamped,
+    color1.lr * (1.0 - mix_clamped) + color2.lr * mix_clamped,
+    color1.lg * (1.0 - mix_clamped) + color2.lg * mix_clamped,
+    color1.lb * (1.0 - mix_clamped) + color2.lb * mix_clamped,
   )
 }
 

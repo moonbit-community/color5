@@ -26,9 +26,9 @@ impl ToXYZ for LUVColor
 impl Show for LUVColor
 
 pub struct LinearRGBColor {
-  r : Double
-  g : Double
-  b : Double
+  lr : Double
+  lg : Double
+  lb : Double
 }
 impl Blend for LinearRGBColor
 impl ToLUV for LinearRGBColor

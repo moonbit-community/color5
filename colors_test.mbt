@@ -66,10 +66,10 @@ test "rgb to linear conversion" {
 
   // Check that conversion produces reasonable values
   match linear_red {
-    { r, g, b } => {
-      let r_reasonable = r > 0.9 && r <= 1.0
-      let g_zero = g == 0.0
-      let b_zero = b == 0.0
+    { lr, lg, lb } => {
+      let r_reasonable = lr > 0.9 && lr <= 1.0
+      let g_zero = lg == 0.0
+      let b_zero = lb == 0.0
       inspect(r_reasonable, content="true")
       inspect(g_zero, content="true")
       inspect(b_zero, content="true")
@@ -80,9 +80,9 @@ test "rgb to linear conversion" {
   let rgb_mid = @colors.rgb(128, 128, 128)
   let linear_mid = rgb_mid.to_linear_rgb()
   match linear_mid {
-    { r, g: _, b: _ } => {
+    { lr, lg: _, lb: _ } => {
       // Due to gamma correction, 128/255 ≈ 0.5 in sRGB should be ~0.22 in linear
-      let gamma_corrected = r < 0.3 && r > 0.1
+      let gamma_corrected = lr < 0.3 && lr > 0.1
       inspect(gamma_corrected, content="true")
     }
   }
@@ -137,10 +137,10 @@ test "xyz to linear conversion" {
 
   // Should be close to (1, 1, 1)
   match linear_white {
-    { r, g, b } => {
-      let r_close = (r - 1.0).abs() < 0.1
-      let g_close = (g - 1.0).abs() < 0.1
-      let b_close = (b - 1.0).abs() < 0.1
+    { lr, lg, lb } => {
+      let r_close = (lr - 1.0).abs() < 0.1
+      let g_close = (lg - 1.0).abs() < 0.1
+      let b_close = (lb - 1.0).abs() < 0.1
       inspect(r_close, content="true")
       inspect(g_close, content="true")
       inspect(b_close, content="true")
@@ -450,14 +450,14 @@ test "trait-based linear rgb conversion" {
   let _linear4 = luv_color.to_linear_rgb()
 
   // Original LinearRGB should be unchanged
-  inspect(linear2, content="{r: 0.8, g: 0.6, b: 0.4}")
+  inspect(linear2, content="{lr: 0.8, lg: 0.6, lb: 0.4}")
 
   // Others should produce valid LinearRGB colors
   match linear1 {
-    { r, g, b } => {
-      let valid_r = r >= 0.0 && r <= 1.0
-      let valid_g = g >= 0.0 && g <= 1.0
-      let valid_b = b >= 0.0 && b <= 1.0
+    { lr, lg, lb } => {
+      let valid_r = lr >= 0.0 && lr <= 1.0
+      let valid_g = lg >= 0.0 && lg <= 1.0
+      let valid_b = lb >= 0.0 && lb <= 1.0
       inspect(valid_r, content="true")
       inspect(valid_g, content="true")
       inspect(valid_b, content="true")
