@@ -26,17 +26,17 @@ test "linear rgb creation and clamping" {
   let _linear_blue = @colors.linear_rgb(0.0, 0.0, 1.0)
   let linear_white = @colors.linear_rgb(1.0, 1.0, 1.0)
   let linear_black = @colors.linear_rgb(0.0, 0.0, 0.0)
-  inspect(linear_red, content="{r: 1, g: 0, b: 0}")
-  inspect(linear_white, content="{r: 1, g: 1, b: 1}")
-  inspect(linear_black, content="{r: 0, g: 0, b: 0}")
+  inspect(linear_red, content="{lr: 1, lg: 0, lb: 0}")
+  inspect(linear_white, content="{lr: 1, lg: 1, lb: 1}")
+  inspect(linear_black, content="{lr: 0, lg: 0, lb: 0}")
 
   // Test clamping
   let clamped_high = @colors.linear_rgb(2.0, 3.0, 4.0)
   let clamped_low = @colors.linear_rgb(-1.0, -2.0, -3.0)
   let clamped_mixed = @colors.linear_rgb(2.0, 0.5, -1.0)
-  inspect(clamped_high, content="{r: 1, g: 1, b: 1}")
-  inspect(clamped_low, content="{r: 0, g: 0, b: 0}")
-  inspect(clamped_mixed, content="{r: 1, g: 0.5, b: 0}")
+  inspect(clamped_high, content="{lr: 1, lg: 1, lb: 1}")
+  inspect(clamped_low, content="{lr: 0, lg: 0, lb: 0}")
+  inspect(clamped_mixed, content="{lr: 1, lg: 0.5, lb: 0}")
 }
 
 ///|
@@ -213,9 +213,9 @@ test "linear rgb blending" {
   let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
   let linear_blue = @colors.linear_rgb(0.0, 0.0, 1.0)
   let linear_purple = linear_red.blend(linear_blue, 0.5)
-  inspect(linear_purple, content="{r: 0.5, g: 0, b: 0.5}")
+  inspect(linear_purple, content="{lr: 0.5, lg: 0, lb: 0.5}")
   let mostly_red = linear_red.blend(linear_blue, 0.25)
-  inspect(mostly_red, content="{r: 0.75, g: 0, b: 0.25}")
+  inspect(mostly_red, content="{lr: 0.75, lg: 0, lb: 0.25}")
 }
 
 ///|
@@ -293,11 +293,11 @@ test "gamma correction edge cases" {
   // Test gamma correction at edge values
   let black_rgb = @colors.rgb(0, 0, 0)
   let black_linear = black_rgb.to_linear_rgb()
-  inspect(black_linear, content="{r: 0, g: 0, b: 0}")
+  inspect(black_linear, content="{lr: 0, lg: 0, lb: 0}")
   
   let white_rgb = @colors.rgb(255, 255, 255)
   let white_linear = white_rgb.to_linear_rgb()
-  inspect(white_linear, content="{r: 1, g: 1, b: 1}")
+  inspect(white_linear, content="{lr: 1, lg: 1, lb: 1}")
   
   // Test reverse conversion
   let pure_linear = @colors.linear_rgb(1.0, 1.0, 1.0)
@@ -361,17 +361,17 @@ test "blend clamping and edge cases" {
   let linear_blue = @colors.linear_rgb(0.0, 0.0, 1.0)
   
   let linear_clamped_neg = linear_red.blend(linear_blue, -1.0)
-  inspect(linear_clamped_neg, content="{r: 1, g: 0, b: 0}")
+  inspect(linear_clamped_neg, content="{lr: 1, lg: 0, lb: 0}")
   
   let linear_clamped_high = linear_red.blend(linear_blue, 2.0)
-  inspect(linear_clamped_high, content="{r: 0, g: 0, b: 1}")
+  inspect(linear_clamped_high, content="{lr: 0, lg: 0, lb: 1}")
 }
 
 ///|
 test "constructor edge cases" {
   // Test linear_rgb with values outside [0,1] (should not be clamped)
   let over_linear = @colors.linear_rgb(1.5, -0.5, 2.0)
-  inspect(over_linear, content="{r: 1, g: 0, b: 1}")
+  inspect(over_linear, content="{lr: 1, lg: 0, lb: 1}")
   
   // Test xyz with various values
   let negative_xyz = @colors.xyz(-10.0, 50.0, 200.0)
@@ -552,7 +552,7 @@ test "edge cases" {
   let black_linear = black_rgb.to_linear_rgb()
   let black_xyz = black_linear.to_xyz()
   let black_luv = black_xyz.to_luv()
-  inspect(black_linear, content="{r: 0, g: 0, b: 0}")
+  inspect(black_linear, content="{lr: 0, lg: 0, lb: 0}")
   inspect(black_xyz, content="{x: 0, y: 0, z: 0}")
   inspect(black_luv, content="{l: 0, u: NaN, v: NaN}")
 
@@ -602,5 +602,5 @@ test "trait-based API" {
   let linear_red = @colors.linear_rgb(1.0, 0.0, 0.0)
   let linear_blue = @colors.linear_rgb(0.0, 0.0, 1.0)
   let linear_purple = linear_red.blend(linear_blue, 0.5)
-  inspect(linear_purple, content="{r: 0.5, g: 0, b: 0.5}")
+  inspect(linear_purple, content="{lr: 0.5, lg: 0, lb: 0.5}")
 }
