@@ -219,17 +219,17 @@ test "linear rgb blending" {
 }
 
 ///|
-test "universal rgb conversion" {
+test "trait-based rgb conversion" {
   let rgb_color = @colors.rgb(255, 128, 64)
   let linear_color = @colors.linear_rgb(0.8, 0.6, 0.4)
   let xyz_color = @colors.xyz(50.0, 60.0, 70.0)
   let luv_color = @colors.luv(75.0, 25.0, -15.0)
 
-  // All should convert to RGB
-  let rgb1 = @colors.rgb_to_rgb(rgb_color)
-  let rgb2 = @colors.linear_rgb_to_rgb(linear_color)
-  let _rgb3 = @colors.xyz_to_rgb(xyz_color)
-  let _rgb4 = @colors.luv_to_rgb(luv_color)
+  // All should convert to RGB using trait methods
+  let rgb1 = rgb_color.to_rgb()
+  let rgb2 = linear_color.to_rgb()
+  let _rgb3 = xyz_color.to_rgb()
+  let _rgb4 = luv_color.to_rgb()
 
   // Original RGB should be unchanged
   inspect(rgb1, content="RGBColor({ {r: 255, g: 128, b: 64 }})")
@@ -248,17 +248,17 @@ test "universal rgb conversion" {
 }
 
 ///|
-test "universal linear rgb conversion" {
+test "trait-based linear rgb conversion" {
   let rgb_color = @colors.rgb(255, 128, 64)
   let linear_color = @colors.linear_rgb(0.8, 0.6, 0.4)
   let xyz_color = @colors.xyz(50.0, 60.0, 70.0)
   let luv_color = @colors.luv(75.0, 25.0, -15.0)
 
-  // All should convert to LinearRGB
-  let linear1 = @colors.rgb_to_linear_rgb(rgb_color)
-  let linear2 = @colors.linear_rgb_to_linear_rgb(linear_color)
-  let _linear3 = @colors.xyz_to_linear_rgb(xyz_color)
-  let _linear4 = @colors.luv_to_linear_rgb(luv_color)
+  // All should convert to LinearRGB using trait methods
+  let linear1 = rgb_color.to_linear_rgb()
+  let linear2 = linear_color.to_linear_rgb()
+  let _linear3 = xyz_color.to_linear_rgb()
+  let _linear4 = luv_color.to_linear_rgb()
 
   // Original LinearRGB should be unchanged
   inspect(linear2, content="LinearRGBColor({ {r: 0.8, g: 0.6, b: 0.4 }})")
@@ -277,17 +277,17 @@ test "universal linear rgb conversion" {
 }
 
 ///|
-test "universal xyz conversion" {
+test "trait-based xyz conversion" {
   let rgb_color = @colors.rgb(255, 128, 64)
   let linear_color = @colors.linear_rgb(0.8, 0.6, 0.4)
   let xyz_color = @colors.xyz(50.0, 60.0, 70.0)
   let luv_color = @colors.luv(75.0, 25.0, -15.0)
 
-  // All should convert to XYZ
-  let xyz1 = @colors.rgb_to_xyz(rgb_color)
-  let _xyz2 = @colors.linear_rgb_to_xyz(linear_color)
-  let xyz3 = @colors.xyz_to_xyz(xyz_color)
-  let _xyz4 = @colors.luv_to_xyz_color(luv_color)
+  // All should convert to XYZ using trait methods
+  let xyz1 = rgb_color.to_xyz()
+  let _xyz2 = linear_color.to_xyz()
+  let xyz3 = xyz_color.to_xyz()
+  let _xyz4 = luv_color.to_xyz()
 
   // Original XYZ should be unchanged
   inspect(xyz3, content="XYZColor({ {x: 50, y: 60, z: 70 }})")
@@ -306,17 +306,17 @@ test "universal xyz conversion" {
 }
 
 ///|
-test "universal luv conversion" {
+test "trait-based luv conversion" {
   let rgb_color = @colors.rgb(255, 128, 64)
   let linear_color = @colors.linear_rgb(0.8, 0.6, 0.4)
   let xyz_color = @colors.xyz(50.0, 60.0, 70.0)
   let luv_color = @colors.luv(75.0, 25.0, -15.0)
 
-  // All should convert to LUV
-  let luv1 = @colors.rgb_to_luv(rgb_color)
-  let _luv2 = @colors.linear_rgb_to_luv(linear_color)
-  let _luv3 = @colors.xyz_to_luv_color(xyz_color)
-  let luv4 = @colors.luv_to_luv(luv_color)
+  // All should convert to LUV using trait methods
+  let luv1 = rgb_color.to_luv()
+  let _luv2 = linear_color.to_luv()
+  let _luv3 = xyz_color.to_luv()
+  let luv4 = luv_color.to_luv()
 
   // Original LUV should be unchanged
   inspect(luv4, content="LUVColor({ {l: 75, u: 25, v: -15 }})")

@@ -11,7 +11,7 @@ This library is a port of the [OCaml colors library](https://github.com/ocaml-tu
 - **Seamless Conversions**: Convert between any color spaces with automatic intermediate conversions
 - **Color Blending**: Blend colors in RGB or LinearRGB space with proper gamma handling
 - **Gamma Correction**: Proper sRGB gamma correction for accurate color representation
-- **Universal Conversion Functions**: Function-based API for color conversions
+- **Trait-Based API**: Clean, consistent methods for all color types
 - **Function Chaining**: Fluent API for chaining color operations with pipe operator
 - **Performance**: Zero-overhead abstractions with no enum discriminants
 
@@ -112,11 +112,11 @@ test "universal conversions with functions" {
   let xyz_color = @colors.xyz(30.0, 25.0, 15.0)
   let luv_color = @colors.luv(60.0, 40.0, 20.0)
   
-  // All can be converted to RGB using specific functions
-  let rgb1 = @colors.rgb_to_rgb(rgb_original)  // Identity
-  let rgb2 = @colors.linear_rgb_to_rgb(linear_color)  // LinearRGB -> RGB
-  let rgb3 = @colors.xyz_to_rgb(xyz_color)     // XYZ -> LinearRGB -> RGB
-  let rgb4 = @colors.luv_to_rgb(luv_color)     // LUV -> XYZ -> LinearRGB -> RGB
+  // All can be converted to RGB using trait methods
+  let rgb1 = rgb_original.to_rgb()  // Identity
+  let rgb2 = linear_color.to_rgb()  // LinearRGB -> RGB
+  let rgb3 = xyz_color.to_rgb()     // XYZ -> LinearRGB -> RGB
+  let rgb4 = luv_color.to_rgb()     // LUV -> XYZ -> LinearRGB -> RGB
   
   // Original should be unchanged
   inspect(rgb1, content="RGBColor({ {r: 200, g: 100, b: 50 }})")
@@ -242,15 +242,23 @@ This library uses separate types for each color space, providing several advanta
 - **IDE support** - autocomplete shows only valid operations
 - **Documentation clarity** - each function can have specific documentation
 
-### Universal Conversion Functions
-The library provides comprehensive conversion functions between all color spaces:
+### Conversion Methods
+The library provides two ways to convert between color spaces:
 
-- **RGB conversions**: `rgb_to_rgb()`, `rgb_to_linear_rgb()`, `rgb_to_xyz()`, `rgb_to_luv()`
-- **LinearRGB conversions**: `linear_rgb_to_rgb()`, `linear_rgb_to_linear_rgb()`, `linear_rgb_to_xyz()`, `linear_rgb_to_luv()`
-- **XYZ conversions**: `xyz_to_rgb()`, `xyz_to_linear_rgb()`, `xyz_to_xyz()`, `xyz_to_luv_color()`
-- **LUV conversions**: `luv_to_rgb()`, `luv_to_linear_rgb()`, `luv_to_xyz_color()`, `luv_to_luv()`
+**Trait Methods (Recommended):**
+- `.to_rgb()` - Convert any color to RGB
+- `.to_linear_rgb()` - Convert any color to LinearRGB  
+- `.to_xyz()` - Convert any color to XYZ
+- `.to_luv()` - Convert any color to LUV
+- `.blend(other, mix)` - Blend two colors of the same type
 
-These functions enable seamless conversion between any color spaces while maintaining type safety.
+**Direct Functions:**
+- `rgb_to_linear()` / `linear_to_rgb()` - RGB ↔ LinearRGB conversion
+- `linear_to_xyz()` / `xyz_to_linear()` - LinearRGB ↔ XYZ conversion  
+- `xyz_to_luv()` / `luv_to_xyz()` - XYZ ↔ LUV conversion
+- `rgb_blend()` / `linear_blend()` - Color blending functions
+
+The trait methods provide a cleaner API while the direct functions offer explicit control over the conversion pipeline.
 
 ### Trait-Based API
 

@@ -1,0 +1,8 @@
+fn LinearRGBColor::blend(Self, Self, Double) -> Self
+
+// fn linear_rgb_to_linear_rgb(LinearRGBColor) -> LinearRGBColor 
+// not needed any more given we already impl ToLinearRGB for LinearRGBColor
+
+//fn linear_rgb_to_luv(LinearRGBColor) -> LUVColor
+// not needed any more given we already impl ToLUV for LinearRGBColor
+

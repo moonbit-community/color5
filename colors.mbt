@@ -328,6 +328,7 @@ pub fn rgb_to_linear(color : RGBColor) -> LinearRGBColor {
 
 ///|
 /// Blend two RGB colors with a mixing ratio.
+/// Also available as trait method: `color1.blend(color2, mix)`
 ///
 /// # Parameters
 /// - `color1`: The first RGB color
@@ -342,6 +343,7 @@ pub fn rgb_to_linear(color : RGBColor) -> LinearRGBColor {
 /// let red = @colors.rgb(255, 0, 0)
 /// let blue = @colors.rgb(0, 0, 255)
 /// let purple = @colors.rgb_blend(red, blue, 0.5)
+/// // Or using trait method: let purple = red.blend(blue, 0.5)
 /// 
 /// inspect(purple, content="RGBColor({ {r: 128, g: 0, b: 128 }})")
 /// ```
@@ -418,6 +420,7 @@ pub fn linear_to_xyz(color : LinearRGBColor) -> XYZColor {
 ///|
 /// Blend two LinearRGB colors with a mixing ratio.
 /// This is more accurate for lighting calculations.
+/// Also available as trait method: `color1.blend(color2, mix)`
 ///
 /// # Parameters
 /// - `color1`: The first LinearRGB color
@@ -539,98 +542,10 @@ pub fn luv_to_xyz(color : LUVColor) -> XYZColor {
 // Universal Conversion Functions
 // ============================================================================
 
-///|
-/// Convert RGB to RGB (identity)
-pub fn rgb_to_rgb(color : RGBColor) -> RGBColor {
-  color
-}
+// Universal RGB conversion functions removed - use .to_rgb() trait method instead
 
-///|
-/// Convert LinearRGB to RGB
-pub fn linear_rgb_to_rgb(color : LinearRGBColor) -> RGBColor {
-  linear_to_rgb(color)
-}
+// Universal LinearRGB conversion functions removed - use .to_linear_rgb() trait method instead
 
-///|
-/// Convert XYZ to RGB
-pub fn xyz_to_rgb(color : XYZColor) -> RGBColor {
-  linear_to_rgb(xyz_to_linear(color))
-}
+// Universal XYZ conversion functions removed - use .to_xyz() trait method instead
 
-///|
-/// Convert LUV to RGB
-pub fn luv_to_rgb(color : LUVColor) -> RGBColor {
-  linear_to_rgb(xyz_to_linear(luv_to_xyz(color)))
-}
-
-///|
-/// Convert RGB to LinearRGB
-pub fn rgb_to_linear_rgb(color : RGBColor) -> LinearRGBColor {
-  rgb_to_linear(color)
-}
-
-///|
-/// Convert LinearRGB to LinearRGB (identity)
-pub fn linear_rgb_to_linear_rgb(color : LinearRGBColor) -> LinearRGBColor {
-  color
-}
-
-///|
-/// Convert XYZ to LinearRGB
-pub fn xyz_to_linear_rgb(color : XYZColor) -> LinearRGBColor {
-  xyz_to_linear(color)
-}
-
-///|
-/// Convert LUV to LinearRGB
-pub fn luv_to_linear_rgb(color : LUVColor) -> LinearRGBColor {
-  xyz_to_linear(luv_to_xyz(color))
-}
-
-///|
-/// Convert RGB to XYZ
-pub fn rgb_to_xyz(color : RGBColor) -> XYZColor {
-  linear_to_xyz(rgb_to_linear(color))
-}
-
-///|
-/// Convert LinearRGB to XYZ
-pub fn linear_rgb_to_xyz(color : LinearRGBColor) -> XYZColor {
-  linear_to_xyz(color)
-}
-
-///|
-/// Convert XYZ to XYZ (identity)
-pub fn xyz_to_xyz(color : XYZColor) -> XYZColor {
-  color
-}
-
-///|
-/// Convert LUV to XYZ
-pub fn luv_to_xyz_color(color : LUVColor) -> XYZColor {
-  luv_to_xyz(color)
-}
-
-///|
-/// Convert RGB to LUV
-pub fn rgb_to_luv(color : RGBColor) -> LUVColor {
-  xyz_to_luv(linear_to_xyz(rgb_to_linear(color)))
-}
-
-///|
-/// Convert LinearRGB to LUV
-pub fn linear_rgb_to_luv(color : LinearRGBColor) -> LUVColor {
-  xyz_to_luv(linear_to_xyz(color))
-}
-
-///|
-/// Convert XYZ to LUV
-pub fn xyz_to_luv_color(color : XYZColor) -> LUVColor {
-  xyz_to_luv(color)
-}
-
-///|
-/// Convert LUV to LUV (identity)
-pub fn luv_to_luv(color : LUVColor) -> LUVColor {
-  color
-}
+// Universal LUV conversion functions removed - use .to_luv() trait method instead

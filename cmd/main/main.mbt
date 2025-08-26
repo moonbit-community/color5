@@ -49,11 +49,11 @@ fn main {
   let xyz_color = @colors.xyz(41.24, 21.26, 1.93) // Approximate red in XYZ
   let luv_color = @colors.luv(53.24, 175.05, 37.75) // Approximate red in LUV
   println("XYZ color: " + xyz_color.to_string())
-  println("XYZ to RGB: " + @colors.xyz_to_rgb(xyz_color).to_string())
-  println("XYZ to Linear: " + @colors.xyz_to_linear_rgb(xyz_color).to_string())
+  println("XYZ to RGB: " + xyz_color.to_rgb().to_string())
+  println("XYZ to Linear: " + xyz_color.to_linear_rgb().to_string())
   println("LUV color: " + luv_color.to_string())
-  println("LUV to RGB: " + @colors.luv_to_rgb(luv_color).to_string())
-  println("LUV to XYZ: " + @colors.luv_to_xyz_color(luv_color).to_string())
+  println("LUV to RGB: " + luv_color.to_rgb().to_string())
+  println("LUV to XYZ: " + luv_color.to_xyz().to_string())
 
   // Demonstrate type safety - these are all compile-time checked!
   println("\n5. Type-safe chained conversions:")

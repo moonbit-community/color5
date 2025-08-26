@@ -6,29 +6,13 @@ fn linear_blend(LinearRGBColor, LinearRGBColor, Double) -> LinearRGBColor
 
 fn linear_rgb(Double, Double, Double) -> LinearRGBColor
 
-fn linear_rgb_to_linear_rgb(LinearRGBColor) -> LinearRGBColor
-
-fn linear_rgb_to_luv(LinearRGBColor) -> LUVColor
-
-fn linear_rgb_to_rgb(LinearRGBColor) -> RGBColor
-
-fn linear_rgb_to_xyz(LinearRGBColor) -> XYZColor
-
 fn linear_to_rgb(LinearRGBColor) -> RGBColor
 
 fn linear_to_xyz(LinearRGBColor) -> XYZColor
 
 fn luv(Double, Double, Double) -> LUVColor
 
-fn luv_to_linear_rgb(LUVColor) -> LinearRGBColor
-
-fn luv_to_luv(LUVColor) -> LUVColor
-
-fn luv_to_rgb(LUVColor) -> RGBColor
-
 fn luv_to_xyz(LUVColor) -> XYZColor
-
-fn luv_to_xyz_color(LUVColor) -> XYZColor
 
 fn rgb(Int, Int, Int) -> RGBColor
 
@@ -36,27 +20,11 @@ fn rgb_blend(RGBColor, RGBColor, Double) -> RGBColor
 
 fn rgb_to_linear(RGBColor) -> LinearRGBColor
 
-fn rgb_to_linear_rgb(RGBColor) -> LinearRGBColor
-
-fn rgb_to_luv(RGBColor) -> LUVColor
-
-fn rgb_to_rgb(RGBColor) -> RGBColor
-
-fn rgb_to_xyz(RGBColor) -> XYZColor
-
 fn xyz(Double, Double, Double) -> XYZColor
 
 fn xyz_to_linear(XYZColor) -> LinearRGBColor
 
-fn xyz_to_linear_rgb(XYZColor) -> LinearRGBColor
-
 fn xyz_to_luv(XYZColor) -> LUVColor
-
-fn xyz_to_luv_color(XYZColor) -> LUVColor
-
-fn xyz_to_rgb(XYZColor) -> RGBColor
-
-fn xyz_to_xyz(XYZColor) -> XYZColor
 
 // Errors
 
