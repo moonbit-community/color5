@@ -27,10 +27,7 @@ fn main {
   println("Red + Green (50/50): " + yellow.to_string())
 
   // Linear blending (more accurate)
-  let linear_purple = linear_red.blend(
-    @colors.linear_rgb(0.0, 0.0, 1.0),
-    0.5,
-  )
+  let linear_purple = linear_red.blend(@colors.linear_rgb(0.0, 0.0, 1.0), 0.5)
   println("Linear Red + Blue (50/50): " + linear_purple.to_string())
 
   // Convert between color spaces

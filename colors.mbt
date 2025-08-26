@@ -351,11 +351,7 @@ fn rgb_to_linear(color : RGBColor) -> LinearRGBColor {
 /// 
 /// inspect(purple, content="RGBColor({ {r: 128, g: 0, b: 128 }})")
 /// ```
-fn rgb_blend(
-  color1 : RGBColor,
-  color2 : RGBColor,
-  mix : Double,
-) -> RGBColor {
+fn rgb_blend(color1 : RGBColor, color2 : RGBColor, mix : Double) -> RGBColor {
   let mix_clamped = clamp(mix, 0.0, 1.0)
   let r = (color1.r.to_double() * (1.0 - mix_clamped) +
   color2.r.to_double() * mix_clamped +
